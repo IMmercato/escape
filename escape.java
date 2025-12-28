@@ -73,7 +73,7 @@ public class escape {
 
         System.out.println("\n\n\u001B[36m=== The Dictator's Challange ===\u001B[0m");
         System.out.println("You received an encoded message. Decode it and enter the result:");
-        
+
         attempts = 3;
         String encodedm = "VGhlIERpY3RhdG9yIHdoaXNwZXJzOiBWZW5pLCBWaWRpLCBWaWNpLg==";
 
@@ -82,7 +82,13 @@ public class escape {
 
             if (answer.equals(new String(Base64.getDecoder().decode(encodedm)))) {
                 System.out.println("\n\u001B[32mCorrect! The path forward is revealed.\u001B[0m");
-                new Decoded();
+                Decoded safe = new Decoded();
+                safe.waitForCompletion();
+
+                for (Frame f : Frame.getFrames()) {
+                    f.dispose();
+                }
+
                 break;
             } else {
                 attempts--;
@@ -96,6 +102,11 @@ public class escape {
             }
         }
 
+        System.out.println("\n\n\u001B[35m╔════════════════════════════════════╗\u001B[0m");
+        System.out.println("\u001B[35m║   CHAPTER II: THE RENAISSANCE      ║\u001B[0m");
+        System.out.println("\u001B[35m╔════════════════════════════════════╗\u001B[0m");
+        System.out.println("\nFlorence, 1503...");
+
         input.close();
         System.out.println("Final score: " + score);
     }
@@ -107,9 +118,9 @@ class OmenWindow {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(300, 200);
 
-        JPanel panel = new JPanel(new GridLayout(2,1));
+        JPanel panel = new JPanel(new GridLayout(2, 1));
         panel.setBackground(new Color(133, 29, 33));
-        panel.setBorder(BorderFactory.createLineBorder(new Color(212, 175, 55),3));
+        panel.setBorder(BorderFactory.createLineBorder(new Color(212, 175, 55), 3));
 
         JLabel omenl = new JLabel(omen, SwingConstants.CENTER);
         omenl.setFont(new Font("Serif", Font.BOLD, 22));
@@ -189,9 +200,8 @@ class SecretGate {
                 header.setFont(header.getFont().deriveFont(16f));
 
                 JTextArea message = new JTextArea(
-                    encoded + "\n\n" +
-                    "Now it is your turn, decode this message to progress."
-                );
+                        encoded + "\n\n" +
+                                "Now it is your turn, decode this message to progress.");
                 message.setEditable(false);
                 message.setLineWrap(true);
                 message.setWrapStyleWord(true);
@@ -216,13 +226,13 @@ class SecretGate {
                 JButton ok = new JButton("OK");
                 ok.addActionListener(ev -> {
                     dialog.dispose();
-                    
+
                     synchronized (lock) {
                         completed = true;
                         lock.notify();
                     }
                 });
-                
+
                 button.add(copy);
                 button.add(ok);
 
@@ -278,10 +288,9 @@ class Decoded {
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        JLabel instruction = new JLabel("<html><center>A mysterious safe stands before you.<br><br>"+
-            "The inscription reads: <i>'Three symbols of victory'</i><br><br>" + 
-            "Enter the 3-digit combination:</center></html>"
-        );
+        JLabel instruction = new JLabel("<html><center>A mysterious safe stands before you.<br><br>" +
+                "The inscription reads: <i>'Three symbols of victory'</i><br><br>" +
+                "Enter the 3-digit combination:</center></html>");
         instruction.setAlignmentX(Component.CENTER_ALIGNMENT);
         instruction.setFont(new Font("Serif", Font.PLAIN, 14));
 
@@ -330,7 +339,7 @@ class Decoded {
         JLabel attempt = new JLabel("3 attempts left", SwingConstants.CENTER);
         attempt.setFont(new Font("Serif", Font.ITALIC, 12));
 
-        final int attempts [] = {3};
+        final int attempts[] = { 3 };
 
         unlock.addActionListener(e -> {
             try {
@@ -346,17 +355,16 @@ class Decoded {
                     successh.setForeground(new Color(0, 128, 0));
 
                     JTextArea message = new JTextArea(
-                        "Inside, you find an ancient scroll:\n\n" +
-                        "\"Veni, Vidi, Vici - I came, I saw, I conquered.\n" +
-                        "But even the mighty Caesar knew:\n" +
-                        "True power lies not in conquest, but in knowledge.\n\n" +
-                        "The Roman Empire has fallen, yet its wisdom endures.\n" +
-                        "Journey now to Florence, where the ancient knowledge\n" +
-                        "was reborn in art, science, and mystery.\n\n" +
-                        "Seek the Master of Renaissance...\n" +
-                        "His mirror holds the key.\"\n\n" +
-                        "--- Chapter I: Complete ---"
-                    );
+                            "Inside, you find an ancient scroll:\n\n" +
+                                    "\"Veni, Vidi, Vici - I came, I saw, I conquered.\n" +
+                                    "But even the mighty Caesar knew:\n" +
+                                    "True power lies not in conquest, but in knowledge.\n\n" +
+                                    "The Roman Empire has fallen, yet its wisdom endures.\n" +
+                                    "Journey now to Florence, where the ancient knowledge\n" +
+                                    "was reborn in art, science, and mystery.\n\n" +
+                                    "Seek the Master of Renaissance...\n" +
+                                    "His mirror holds the key.\"\n\n" +
+                                    "--- Chapter I: Complete ---");
                     message.setEditable(false);
                     message.setLineWrap(true);
                     message.setWrapStyleWord(true);
@@ -393,16 +401,14 @@ class Decoded {
 
                         if (attempts[0] == 1) {
                             JOptionPane.showMessageDialog(frame,
-                                "Wrong combination!\n\nHint: Think about the message...",
-                                "Incorrect",
-                                JOptionPane.WARNING_MESSAGE
-                            );
+                                    "Wrong combination!\n\nHint: Think about the message...",
+                                    "Incorrect",
+                                    JOptionPane.WARNING_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(frame, 
-                                "Wrong combination! Try again.",
-                                "Incorrect",
-                                JOptionPane.ERROR_MESSAGE
-                            );
+                            JOptionPane.showMessageDialog(frame,
+                                    "Wrong combination! Try again.",
+                                    "Incorrect",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
 
                         primo.setText("");
@@ -410,20 +416,18 @@ class Decoded {
                         terzo.setText("");
                         primo.requestFocus();
                     } else {
-                        JOptionPane.showMessageDialog(frame, 
-                            "The safe locks permanently. \nYou have failed.",
-                            "Game Over",
-                            JOptionPane.ERROR_MESSAGE
-                        );
+                        JOptionPane.showMessageDialog(frame,
+                                "The safe locks permanently. \nYou have failed.",
+                                "Game Over",
+                                JOptionPane.ERROR_MESSAGE);
                         System.exit(0);
                     }
                 }
             } catch (Exception ev) {
                 JOptionPane.showMessageDialog(frame,
-                    "Please enter valid digits (0-9)",
-                    "Invalid Input",
-                    JOptionPane.WARNING_MESSAGE
-                );
+                        "Please enter valid digits (0-9)",
+                        "Invalid Input",
+                        JOptionPane.WARNING_MESSAGE);
             }
         });
 
