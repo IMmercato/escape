@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.util.Base64;
 
 public class escape {
+    public static int score = 100;
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
@@ -17,7 +18,6 @@ public class escape {
 
         int shift = (int) (Math.PI * 5) % 26;
         int attempts = 3;
-        int score = 100;
 
         String encoded = "THd0YyBScHRocGcgdXRhYSwgaXd0IEh0Y3BpdCBsd3hoZXRndHM6IEhFRkcgamN4aXRzIGx4aXcgaXd0IFhzdGggY2picXRnLCB5ZHhjdHMgcW4gamNzdGdocmRndC4gVXhnaGksIGd0aGlkZ3QgaXd4aCBocmdkYWEgbHhpdyBpd3QgWHN0aCBpZCBhdHBnYyBiZGd0Lg==";
 
@@ -106,6 +106,13 @@ public class escape {
         System.out.println("\u001B[35m║   CHAPTER II: THE RENAISSANCE      ║\u001B[0m");
         System.out.println("\u001B[35m╔════════════════════════════════════╗\u001B[0m");
         System.out.println("\nFlorence, 1503...");
+
+        LeonardoMirror leonardo = new LeonardoMirror();
+        leonardo.waitForCompletion();
+
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
 
         input.close();
         System.out.println("Final score: " + score);
@@ -274,7 +281,7 @@ class Decoded {
     public Decoded() {
         JFrame frame = new JFrame("The Ancient Safe");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(450, 300);
+        frame.setSize(450, 350);
         frame.setLayout(new BorderLayout(15, 15));
 
         JPanel header = new JPanel();
@@ -434,6 +441,186 @@ class Decoded {
         frame.add(header, BorderLayout.NORTH);
         frame.add(center, BorderLayout.CENTER);
         frame.add(attempt, BorderLayout.SOUTH);
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+
+class LeonardoMirror {
+    private boolean completed = false;
+    private final Object lock = new Object();
+
+    public LeonardoMirror() {
+        JFrame frame = new JFrame("Leonardo's Workshop - 1503");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(700, 500);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        JPanel header = new JPanel();
+        header.setBackground(new Color(101, 67, 33));
+        JLabel headerl = new JLabel("Leonardo da Vinci's Secret Notes");
+        headerl.setFont(new Font("Serif", Font.BOLD, 22));
+        headerl.setForeground(new Color(255, 223, 186));
+        header.add(headerl);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        content.setBackground(new Color(245, 235, 220));
+
+        JTextArea story = new JTextArea(
+            "Florence, Year 1503\n\n" +
+            "You enter Leonardo's workshop. Scattered papers cover his desk.\n" +
+            "The master wrote in a peculiar way, readable only in a one way.\n" +
+            "This was his method to protect his discoveries from prying eyes.\n\n" +
+            "On his desk, you find a mysterious note..."
+        );
+        story.setEditable(false);
+        story.setLineWrap(true);
+        story.setWrapStyleWord(true);
+        story.setFont(new Font("Serif", Font.ITALIC, 13));
+        story.setBackground(new Color(245, 235, 220));
+        story.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel specchio = new JPanel();
+        specchio.setLayout(new BorderLayout());
+        specchio.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(Color.DARK_GRAY, 2),
+            "Leonardo's Note"
+        ));
+        specchio.setBackground(Color.WHITE);
+
+        
+
+        JTextArea texta = new JTextArea(text);
+        texta.setEditable(false);
+        texta.setLineWrap(true);
+        texta.setWrapStyleWord(true);
+        texta.setFont(new Font("Monospaced", Font.BOLD, 16));
+        texta.setMargin(new Insets(15, 15, 15, 15));
+        texta.setBackground(new Color(255, 253, 240));
+
+        specchio.add(new JScrollPane(texta), BorderLayout.CENTER);
+
+        JLabel hint = new JLabel("Hint: Try reading it backwards, or use a mirror...");
+        hint.setFont(new Font("Serif", Font.ITALIC, 11));
+        hint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel input = new JPanel();
+        input.setLayout(new BoxLayout(input, BoxLayout.Y_AXIS));
+        input.setBackground(new Color(245, 235, 220));
+        input.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JLabel inputl = new JLabel("Decode the message and enter it below:");
+        inputl.setFont(new Font("Serif", Font.BOLD, 13));
+        inputl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextArea answera = new JTextArea(3, 40);
+        answera.setLineWrap(true);
+        answera.setWrapStyleWord(true);
+        answera.setFont(new Font("Serif", Font.PLAIN, 13));
+        JScrollPane answers = new JScrollPane(answera);
+        answers.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        input.add(inputl);
+        input.add(Box.createVerticalStrut(5));
+        input.add(answers);
+
+        JPanel button = new JPanel(new FlowLayout());
+        button.setBackground(new Color(245, 235, 220));
+
+        JButton hintb = new JButton("-30p Hint");
+        JButton sumbit = new JButton("Sumbit Answer");
+        JButton copy = new JButton("Copy Text");
+
+        hintb.setFont(new Font("Serif", Font.PLAIN, 12));
+        sumbit.setFont(new Font("Serif", Font.BOLD, 14));
+        copy.setFont(new Font("Serif", Font.PLAIN, 12));
+
+        button.add(copy);
+        button.add(hintb);
+        button.add(sumbit);
+
+        copy.addActionListener(e -> {
+            StringSelection selection = new StringSelection(text);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(selection, null);
+            copy.setText("Copied!");
+            Timer timer = new Timer(1500, ev -> copy.setText("Copy Text"));
+            timer.setRepeats(false);
+            timer.start();
+        });
+
+        hintb.addActionListener(e -> {
+            String decode = new StringBuilder(primo).reverse().toString();
+            JOptionPane.showMessageDialog(frame,
+                "Mirror Reflection:\n\n" + decode,
+                "Looking Glass",
+                JOptionPane.INFORMATION_MESSAGE
+             );
+        });
+
+        final int attempts [] = {3};
+        JLabel attempt = new JLabel("Attempts: 3", SwingConstants.CENTER);
+        attempt.setFont(new Font("Serif", Font.ITALIC, 11));
+
+        sumbit.addActionListener(e -> {
+            String answer = answera.getText().trim();
+            String correct = new StringBuilder(text).reverse().toString();
+
+            if (answer.equalsIgnoreCase(correct)) {
+                synchronized (lock) {
+                    completed = true;
+                    lock.notify();
+                }
+            } else {
+                attempts[0]--;
+                attempt.setText("Attempts: " + attempts[0]);
+
+                if (attempts[0] > 0) {
+                    JOptionPane.showMessageDialog(frame, 
+                        "Not quite right. Remeber: Mirror\n" +
+                        "Attemtps remaining: " + attempts[0],
+                        "Try Again",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(frame, 
+                        "You've run out of attempts.\nThe workshop doors close forever.",
+                        "Game Over",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    System.exit(0);
+                }
+            }
+        });
+
+        content.add(story);
+        content.add(Box.createVerticalStrut(15));
+        content.add(specchio);
+        content.add(Box.createVerticalStrut(10));
+        //content.add(hint);
+        content.add(Box.createVerticalStrut(10));
+        content.add(input);
+        content.add(Box.createVerticalStrut(10));
+        //content.add();
+
+        frame.add(header, BorderLayout.NORTH);
+        frame.add(content, BorderLayout.CENTER);
+        frame.add(button, BorderLayout.SOUTH);
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
