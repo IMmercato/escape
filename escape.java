@@ -117,7 +117,54 @@ public class escape {
         }
 
         System.out.println("\nYou arrive at the Palazzo Vecchio...");
-        System.out.println("The Black Plinth awaits...\n");
+        System.out.println("\n\u001B[36m=== The Guardian's Question ===\u001B[0m");
+        System.out.println("A hooded figure blocks your path to the Black Plinth.");
+        System.out.println("'Answer me this,' they whisper:");
+        System.out.println("\n'What is the name of the biggest and most family of Florence?'");
+        System.out.println("'The family that ruled this city and patronized the greatest artists?'\n");
+
+        attempts = 3;
+        boolean family = false;
+
+        String correct [] = {"TWVkaWNp", "VGhlIE1lZGljaQ==", "TWVkaWNpIGZhbWlseQ==", "SG91c2Ugb2YgTWVkaWNp", "ZGUnIE1lZGljaQ=="};
+
+        while (attempts > 0 && !family) {
+            System.out.print("> ");
+            String familya = input.nextLine().trim();
+
+            for (String right : correct) {
+                if (familya.equalsIgnoreCase(new String(Base64.getDecoder().decode(right)))) {
+                    System.out.println("\n\u001B[32mCorrect! The " + new String(Base64.getDecoder().decode(correct[0])) + " family.\u001B[0m");
+                    System.out.println("The figure nods and steps aside.");
+                    System.out.println("'The Black Plinth awaits you...'\n");
+                    family = true;
+                    break;
+                }
+            }
+
+            if (!family) {
+                attempts--;
+                score -= 10;
+
+                if (attempts > 0) {
+                    System.out.println("\u001B[31mIncorrect.\u001B[0m Attempts remaining: " + attempts);
+                    if (attempts == 1) {
+                        System.out.println("Hint: Leonardo mentioned them as his patrons...");
+                    }
+                } else {
+                    System.out.println("\n\u001B[31mThe guardian blocks your path permanently. Game Over.");
+                    System.exit(0);
+                }
+            }
+        }
+
+        new MediciCipher(input);
+
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
+
+
 
         input.close();
         System.out.println("Final score: " + score);
@@ -508,9 +555,9 @@ class LeonardoMirror {
         ));
         specchio.setBackground(Color.WHITE);
 
-        String primo = ".oihccV ozzalaP eht ni htnilP kcalB eht keeS .tsap eht ot yek eht sdloh ";
+        String primo = ".oihcceV ozzalaP eht ni htnilP kcalB eht keeS .tsap eht ot yek eht sdloh";
         String secondo = "ecnerolF fo ylimaf tseggiB ehT";
-        String text = primo + secondo;
+        String text = primo + " " + secondo;
 
         JTextArea texta = new JTextArea(text);
         texta.setEditable(false);
@@ -694,7 +741,7 @@ class LeonardoMirror {
     }
 }
 
-class Cipher {
+class MediciCipher {
     private boolean completed = false;
     private final Object lock = new Object();
 
@@ -708,12 +755,12 @@ class Cipher {
         }
     }
 
-    public Cipher(Scanner input) {
+    public MediciCipher(Scanner input) {
         showIntroFrame();
 
         waitForIntroCompletion();
 
-        System.out.println("\n\u001B[36m=== The  Cipher Challenge ===\u001B[0m");
+        System.out.println("\n\u001B[36m=== The Medici Cipher Challenge ===\u001B[0m");
         System.out.println("\nThe encrypted message on the Black Plinth:");
         System.out.println("\u001B[43m");
 
@@ -732,7 +779,9 @@ class Cipher {
         System.out.println("Type 'hint' for help, 'decode' to auto-decode (-20p), or enter your answer:");
 
         int attempts = 3;
-        
+        String correct = "DANTE GUARDS SECRETS OF THE DARK FUTURE. " +
+                        "IN THE YEAR 1300, A POET WENT INTO THE ABYSS. " +
+                        "HIS NAME: DANTE ALIGHIERI.";
 
         while (attempts > 0) {
             System.out.println("\n>");
@@ -745,7 +794,7 @@ class Cipher {
                 continue;
             } else if (response.equalsIgnoreCase("decode")) {
                 escape.score -= 20;
-                String decoded = decodeCipher(response);
+                String decoded = decodeMediciCipher(response);
                 System.out.println("\n\u001B[32mAuto-decoded message:\u001B[0m");
                 System.out.println(decoded);
                 System.out.println("\n(You can now enter this as yuor answer)");
@@ -756,7 +805,7 @@ class Cipher {
             String normalizedCorrect = correct.replaceAll("[^A-Z0-9\\s", "");
 
             if (normalizedAnswer.equals(normalizedCorrect)) {
-                System.out.println("\n\u001B[32mCorrect! You've decoded the  cipher!\u001B[0m");
+                System.out.println("\n\u001B[32mCorrect! You've decoded the Medici cipher!\u001B[0m");
 
                 SwingUtilities.invokeLater(() -> showSuccessFrame());
                 break;
@@ -765,7 +814,7 @@ class Cipher {
                 if (attempts > 0) {
                     System.out.println("\u001B[31mIncorrect decoding.\u001B[0m Attempts remaining: " + attempts);
                 } else {
-                    System.out.println("\n\u001B[31mYou've failed to decode the  cipher. Game Over.\u001B[0m");
+                    System.out.println("\n\u001B[31mYou've failed to decode the Medici cipher. Game Over.\u001B[0m");
                     System.exit(0);
                 }
             }
@@ -783,7 +832,7 @@ class Cipher {
 
             JPanel header = new JPanel();
             header.setBackground(new Color(128, 0,0));
-            JLabel headerl = new JLabel("⚜️ The 's Secret");
+            JLabel headerl = new JLabel("⚜️ The Medici's Secret");
             headerl.setFont(new Font("Serif", Font.BOLD, 24));
             headerl.setForeground(new Color(255, 215, 0));
             header.add(headerl);
@@ -792,9 +841,9 @@ class Cipher {
                 "Palazzo Vecchio, Florence - 1503\n\n" +
                 "You enter the Hall of the Five Hundred, a vast chamber adorned\n" +
                 "with Renaissance frescoes. In the center stands the Black Plinth,\n" +
-                "an ancient stone monument bearing the  crest.\n\n" +
+                "an ancient stone monument bearing the Medici crest.\n\n" +
                 "Carved into its dark surface is an encrypted message.\n\n" +
-                "The  family, rulers of Florence and patrons of the arts,\n" +
+                "The Medici family, rulers of Florence and patrons of the arts,\n" +
                 "were also keepers of ancient secrets. They used an uncknown\n" +
                 "cipher to protect their most guarded knowledge.\n\n" +
                 "The inscription glows faintly in the torchlight...\n" +
@@ -844,7 +893,7 @@ class Cipher {
         }
     }
 
-    private String decodeCipher(String encrypted) {
+    private String decodeMediciCipher(String encrypted) {
         StringBuilder decoded = new StringBuilder();
         for (char c : encrypted.toCharArray()) {
             if (Character.isLetter(c)) {
@@ -859,7 +908,7 @@ class Cipher {
     }
 
     private void showSuccessFrame() {
-        JFrame frame = new JFrame("The  Secret Revealed");
+        JFrame frame = new JFrame("The Medici Secret Revealed");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(650, 450);
         frame.setLayout(new BorderLayout(10, 10));
@@ -870,7 +919,7 @@ class Cipher {
         header.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 0));
 
         JTextArea message = new JTextArea(
-            "You've cracked the  cipher!\n\n" +
+            "You've cracked the Medici cipher!\n\n" +
             "\"DANTE GUARDS SECRETS OF THE DARK FUTURE.\n" +
             "IN THE YEAR 1300, A POET WENT INTO THE ABYSS.\n" +
             "HIS NAME: DANTE ALIGHIERI.\"\n\n" +
