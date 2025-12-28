@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Scanner;
 import javax.swing.*;
 import java.util.Base64;
@@ -105,10 +107,22 @@ class OmenWindow {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(300, 200);
 
-        frame.setLayout(new BorderLayout());
-        frame.add(new JLabel(omen, SwingConstants.CENTER), BorderLayout.CENTER);
-        frame.add(new JLabel(meaning, SwingConstants.CENTER), BorderLayout.SOUTH);
+        JPanel panel = new JPanel(new GridLayout(2,1));
+        panel.setBackground(new Color(133, 29, 33));
+        panel.setBorder(BorderFactory.createLineBorder(new Color(212, 175, 55),3));
 
+        JLabel omenl = new JLabel(omen, SwingConstants.CENTER);
+        omenl.setFont(new Font("Serif", Font.BOLD, 22));
+        omenl.setForeground(new Color(212, 175, 55));
+
+        JLabel meaningl = new JLabel("<html><center>" + meaning + "</center></html>", SwingConstants.CENTER);
+        meaningl.setFont(new Font("Serif", Font.PLAIN, 16));
+        meaningl.setForeground(Color.WHITE);
+
+        panel.add(omenl);
+        panel.add(meaningl);
+
+        frame.add(panel);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
@@ -256,15 +270,17 @@ class Decoded {
         JPanel header = new JPanel();
         header.setBackground(new Color(139, 69, 19));
         JLabel hLabel = new JLabel("The Senator's Safe");
+        header.setFont(new Font("Serif", Font.BOLD, 24));
+        header.setForeground(Color.WHITE);
         header.add(hLabel);
 
         JPanel center = new JPanel();
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-        JLabel instruction = new JLabel("A mysterious safe stands before you.\n\n"+
-            "The inscription reads: 'Three symbols of victory'\n\n" + 
-            "Enter the 3-digit combination:"
+        JLabel instruction = new JLabel("<html><center>A mysterious safe stands before you.<br><br>"+
+            "The inscription reads: <i>'Three symbols of victory'</i><br><br>" + 
+            "Enter the 3-digit combination:</center></html>"
         );
         instruction.setAlignmentX(Component.CENTER_ALIGNMENT);
         instruction.setFont(new Font("Serif", Font.PLAIN, 14));
@@ -275,9 +291,25 @@ class Decoded {
         JTextField secondo = new JTextField(2);
         JTextField terzo = new JTextField(2);
 
+        Font digit = new Font("Monospaced", Font.BOLD, 24);
+        primo.setFont(digit);
+        secondo.setFont(digit);
+        terzo.setFont(digit);
+
         primo.setHorizontalAlignment(JTextField.CENTER);
         secondo.setHorizontalAlignment(JTextField.CENTER);
         terzo.setHorizontalAlignment(JTextField.CENTER);
+
+        primo.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                if (primo.getText().length() == 1) secondo.requestFocus();
+            }
+        });
+        secondo.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                if (secondo.getText().length() == 1) terzo.requestFocus();
+            }
+        });
 
         input.add(primo);
         input.add(new JLabel(" - "));
@@ -295,9 +327,97 @@ class Decoded {
         center.add(Box.createHorizontalStrut(20));
         center.add(unlock);
 
+        JLabel attempt = new JLabel("3 attempts left", SwingConstants.CENTER);
+        attempt.setFont(new Font("Serif", Font.ITALIC, 12));
+
+        final int attempts [] = {3};
+
         unlock.addActionListener(e -> {
             try {
                 String pin = primo.getText() + secondo.getText() + terzo.getText();
+
+                if (pin.equals(new String(Base64.getDecoder().decode("NTU1")))) {
+                    JDialog success = new JDialog(frame, "Safe Unlocked!", true);
+                    success.setSize(500, 300);
+                    success.setLayout(new BorderLayout(10, 10));
+
+                    JLabel successh = new JLabel(" The Safe Opens...", SwingConstants.CENTER);
+                    successh.setFont(new Font("Serif", Font.BOLD, 20));
+                    successh.setForeground(new Color(0, 128, 0));
+
+                    JTextArea message = new JTextArea(
+                        "Inside, you find an ancient scroll:\n\n" +
+                        "\"Veni, Vidi, Vici - I came, I saw, I conquered.\n" +
+                        "But even the mighty Caesar knew:\n" +
+                        "True power lies not in conquest, but in knowledge.\n\n" +
+                        "The Roman Empire has fallen, yet its wisdom endures.\n" +
+                        "Journey now to Florence, where the ancient knowledge\n" +
+                        "was reborn in art, science, and mystery.\n\n" +
+                        "Seek the Master of Renaissance...\n" +
+                        "His mirror holds the key.\"\n\n" +
+                        "--- Chapter I: Complete ---"
+                    );
+                    message.setEditable(false);
+                    message.setLineWrap(true);
+                    message.setWrapStyleWord(true);
+                    message.setMargin(new Insets(15, 15, 15, 15));
+                    message.setFont(new Font("Serif", Font.PLAIN, 13));
+
+                    JButton continueButton = new JButton("Continue to Renaissance");
+                    continueButton.setFont(new Font("Serif", Font.BOLD, 14));
+                    continueButton.addActionListener(ev -> {
+                        success.dispose();
+                        frame.dispose();
+
+                        synchronized (lock) {
+                            completed = true;
+                            lock.notify();
+                        }
+                    });
+
+                    JPanel button = new JPanel();
+                    button.add(continueButton);
+
+                    success.add(successh, BorderLayout.NORTH);
+                    success.add(new JScrollPane(message), BorderLayout.CENTER);
+                    success.add(button, BorderLayout.SOUTH);
+
+                    success.setLocationRelativeTo(frame);
+                    success.setVisible(true);
+                } else {
+                    attempts[0]--;
+
+                    if (attempts[0] > 0) {
+                        attempt.setText(attempts[0] + "attempts left");
+                        attempt.setForeground(Color.RED);
+
+                        if (attempts[0] == 1) {
+                            JOptionPane.showMessageDialog(frame,
+                                "Wrong combination!\n\nHint: Think about the message...",
+                                "Incorrect",
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                        } else {
+                            JOptionPane.showMessageDialog(frame, 
+                                "Wrong combination! Try again.",
+                                "Incorrect",
+                                JOptionPane.ERROR_MESSAGE
+                            );
+                        }
+
+                        primo.setText("");
+                        secondo.setText("");
+                        terzo.setText("");
+                        primo.requestFocus();
+                    } else {
+                        JOptionPane.showMessageDialog(frame, 
+                            "The safe locks permanently. \nYou have failed.",
+                            "Game Over",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        System.exit(0);
+                    }
+                }
             } catch (Exception ev) {
                 JOptionPane.showMessageDialog(frame,
                     "Please enter valid digits (0-9)",
@@ -309,8 +429,21 @@ class Decoded {
 
         frame.add(header, BorderLayout.NORTH);
         frame.add(center, BorderLayout.CENTER);
+        frame.add(attempt, BorderLayout.SOUTH);
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 }
