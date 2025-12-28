@@ -187,3 +187,49 @@ input[type="text"], input[type="password"] {
     font-family: 'Courier New', Courier, monospace;
     line-height: 1.6;
 }
+
+.verify {
+    text-align: center;
+}
+
+.verify h1 {
+    color: #ffd700;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.safe {
+    text-align: center;
+}
+
+.safe button {
+    width: 100%;
+    font-size: 1.2rem;
+    margin-top: 20px;
+}
+
+.safe p {
+    text-align: center;
+    color: #ffaa00;
+}
+
+.pins {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.pins input {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.pins span {
+    color: #ffd700;
+    font-size: 2rem;
+}

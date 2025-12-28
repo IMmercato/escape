@@ -68,7 +68,73 @@
                         <p style="color: #ffd700; margin-bottom: 10px;" id="finalMessage"></p>
                         <p style="color: #ffaa00;">Now it is your turn...</p>
                     </div>
+                    <p class="info">Score: <span id="score1"></span></p>
+                    <button onclick="verify()">Continue...</button>
+                </div>
+            </div>
+
+            <div id="verify" class="screen">
+                <div class="verify">
+                    <h1>The Dictator's Challange</h1>
+                    <div class="box">
+                        <h2>You received an encoded message. Decode it and enter the result:</h2>
+                        
+                        <input type="text" id="answer" placeholder="Enter the decoded text...">
+                        <button onclick="sumbitDecode()">Sumbit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="safe" class="screen">
+                <div class="safe">
+                    <div class="box">
+                        <h1>The Ancient Safe</h1>
+                        <p>
+                            A mysterious safe stands before you.<br><br>
+                            The inscription reads: <em>'Three symbols of victory'</em><br><br>
+                            Enter the 3-digit combination:
+                        </p>
+                        <div class="pins">
+                            <input type="text" id="primo" maxlength="1">
+                            <span>-</span>
+                            <input type="text" id="secondo" maxlength="1">
+                            <span>-</span>
+                            <input type="text" id="terzo" maxlength="1">
+                        </div>
+
+                        <button onclick="unlockSafe()">Unlock Safe</button>
+                        <p id="safeAttempts" style="margin-top: 15px; font-style: italic;">3 attempts left</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="complete" class="screen">
+                <div class="victory">
+                    <h1>Safe Unlocked!</h1>
+                    <div class="box success">
+                        <h2>The Safe Opens...</h2>
+                        <p style="color: #88ff88; line-height: 1.8; text-align: left; margin: 20px 0;">
+                            Inside, you find an ancient scroll:<br><br>
+                            <em>"Veni, Vidi, Vici - I came, I saw, I conquered.<br>
+                            But even the mighty Caesar knew:<br>
+                            True power lies not in conquest, but in knowledge.<br><br>
+                            The Roman Empire has fallen, yet its wisdom endures.<br>
+                            Journey now to Florence, where the ancient knowledge<br>
+                            was reborn in art, science, and mystery.<br><br>
+                            Seek the Master of Renaissance...<br>
+                            His mirror holds the key."</em>
+                        </p>
+                        <p style="color: #ffd700; font-size: 1.5rem; margin-top: 30px; font-weight: bold;">
+                            --- Chapter I: Complete ---
+                        </p>
+                    </div>
                     <p class="info">Final Score: <span id="finalScore"></span></p>
+                    <div>
+                        <p style="color: #d8bfd8; font-size: 1.3rem; margin-bottom: 10px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+                        <p style="color: #d8bfd8; font-size: 1.5rem; font-weight: bold;">CHAPTER II: THE RENAISSANCE</p>
+                        <p style="color: #d8bfd8; font-size: 1.3rem; margin-top: 10px;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+                        <p style="color: #ffaa00; font-size: 1.2rem; margin-top: 20px; font-style: italic;">Florence, 1503...</p>
+                    </div>
                 </div>
             </div>
 
