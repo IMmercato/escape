@@ -28,7 +28,79 @@ function caesarCipher(text, key) {
     return result;
 }
 
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+}
 
 function startGame() {
-
+    showScreen('puzzle');
 }
+
+function sumbitShift() {
+    const input = document.getElementById('shiftInput').value;
+
+    if (input === '1') {
+        document.getElementById('hint').textContent = atob("SWR1cyBNYXJ0aWFl");
+        document.getElementById('suggest').textContent = atob("V2hlbiBkYWdnZXJzIG1ldCBkZXN0aW55");
+        document.getElementById('omen').classList.add('show');
+        document.getElementById('shiftInput').value = '';
+        return;
+    }
+
+    const k = parseInt(input);
+    if (isNaN(input)) {
+        alert('The gods do not understand this symbol.');
+        document.getElementById('shiftInput').value = '';
+        return;
+    }
+
+    if (k === shift) {
+        const restored = caesarCipher(encrypted, -k);
+        document.getElementById('restoredText').textContent = restored;
+        showScreen('gate');
+    } else {
+        attempts--;
+        score -= 20;
+
+        document.getElementById('attempts').textContent = attempts;
+        document.getElementById('score').textContent = score;
+
+        const rot13 = caesarCipher(encrypted, 13);
+        document.getElementById('hintText').textContent = rot13;
+        document.getElementById('hintBox').style.display = 'block';
+
+        if (attempts === 0) {
+            showScreen('gameover');
+        }
+    }
+
+    document.getElementById('shiftInput').value = '';
+}
+
+function sumbitGate() {
+    const psw = document.getElementById('psw').value;
+    const flag = atob("c3Bxcl8=");
+    const correctPhrase = flag + shift;
+
+    if (psw === correctPhrase) {
+        const message = "VGhlIERpY3RhdG9yIHdoaXNwZXJzOiBWZW5pLCBWaWRpLCBWaWNpLg==";
+        document.getElementById('finalMessage').textContent = message;
+        document.getElementById('finalScore').textContent = score;
+        showScreen('victory');
+    } else {
+        alert('The Senate rejects your claim.');
+    }
+}
+
+function closeOmen() {
+    document.getElementById('omen').classList.remove('show');
+}
+
+document.getElementById('shiftInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') sumbitShift();
+});
+
+document.getElementById('psw').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') sumbitGate();
+});

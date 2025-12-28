@@ -21,6 +21,71 @@
                     <h2>Fragmentum Obscurum</h2>
                     <div class="encrypted-text" id="encryptedText"></div>
                 </div>
+
+                <div class="box">
+                    <p>To proceed, restore the scroll. (Type 1 for omen)</p>
+                    <p class="info">Attempts left: <span id="attempts">3</span></p>
+                    <p class="info">Score: <span id="score">100</span></p>
+
+                    <input type="text" id="shiftInput" placeholder="Enter shift value...">
+                    <button onclick="sumbitShift()">Sumbit</button>
+
+                    <div id="hintBox" class="hint" style="display: none;">
+                        <h3>Incorrect shift.</h3>
+                        <p>Hint of corruption (ROT13):</p>
+                        <p class="hint-text" id="hintText"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gate" class="screen">
+                <div class="box success">
+                    <h2>Scroll Restored</h2>
+                    <p class="restored-text" id="restoredText"></p>
+                </div>
+
+                <div class="box">
+                    <h2>Gate of the Dictator</h2>
+
+                    <div class="input-group">
+                        <label>Enter your Roman Name:</label>
+                        <input type="text" id="romanName">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Enter the Secret Phrase:</label>
+                        <input type="text" id="psw">
+                    </div>
+
+                    <button onclick="sumbitGate()">Invoke the Senate</button>
+                </div>
+            </div>
+
+            <div id="victory" class="screen">
+                <div class="victory">
+                    <h1>Access Granted</h1>
+                    <div class="box success">
+                        <p id="finalMessage"></p>
+                    </div>
+                    <p class="info">Final Score: <span id="finalScore"></span></p>
+                </div>
+            </div>
+
+            <div id="gameover" class="screen">
+                <div class="gameover">
+                    <h1>The gods abandon you</h1>
+                    <p>Game Over</p>
+                    <button onclick="location.reload()">Try Again</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="omen" class="modal">
+            <div class="modal-content">
+                <h3>Omen of the Augurs</h3>
+                <p style="font-size: 2rem;" id="hint"></p>
+                <p style="font-style: italic; color: #ffaa00;" id="suggest"></p>
+                <button onclick="closeOmen()">Close</button>
             </div>
         </div>
         
