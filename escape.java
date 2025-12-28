@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.util.Scanner;
 import javax.swing.*;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class escape {
     public static int score = 100;
@@ -113,6 +115,9 @@ public class escape {
         for (Frame f : Frame.getFrames()) {
             f.dispose();
         }
+
+        System.out.println("\nYou arrive at the Palazzo Vecchio...");
+        System.out.println("The Black Plinth awaits...\n");
 
         input.close();
         System.out.println("Final score: " + score);
@@ -565,7 +570,8 @@ class LeonardoMirror {
         });
 
         hintb.addActionListener(e -> {
-            String decode = new StringBuilder(primo).reverse().toString();
+            escape.score -= 30;
+            String decode = new StringBuilder(secondo).reverse().toString();
             JOptionPane.showMessageDialog(frame,
                 "Mirror Reflection:\n\n" + decode,
                 "Looking Glass",
@@ -579,13 +585,11 @@ class LeonardoMirror {
 
         sumbit.addActionListener(e -> {
             String answer = answera.getText().trim();
-            String correct = new StringBuilder(text).reverse().toString();
+            String correct = new StringBuilder(text).reverse().toString().trim();
 
             if (answer.equalsIgnoreCase(correct)) {
-                synchronized (lock) {
-                    completed = true;
-                    lock.notify();
-                }
+                showSuccessDialog(frame);
+                JOptionPane.showMessageDialog(frame, "Correct! The path is revealed.");
             } else {
                 attempts[0]--;
                 attempt.setText("Attempts: " + attempts[0]);
@@ -624,6 +628,137 @@ class LeonardoMirror {
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void showSuccessDialog(JFrame parentFrame) {
+        JDialog dialog = new JDialog(parentFrame, "Mystery Solved!", true);
+        dialog.setSize(550, 350);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("Leonardo's Secret Revealed", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 20));
+        header.setForeground(new Color(0, 100, 0));
+
+        JTextArea message = new JTextArea(
+            "You've decoded Leonardo's mirror writing!\n\n" +
+            "\"The Biggest family of Florence holds the key to the past.\n" +
+            "Seek the Black Plinth in the Palazzo Vecchio.\"\n\n" +
+            "Leonardo nods approvingly as you decipher his notes.\n" +
+            "He gestures to a hidden passage:\n\n" +
+            "\"This family were my patrons, but also keepers of secrets\n" +
+            "older than Florence itself. Their cipher guards knowledge\n" +
+            "from a darker time...\"\n\n" +
+            "The passage leads toward the Palazzo Vecchio..."
+        );
+        message.setEditable(false);
+        message.setLineWrap(true);
+        message.setWrapStyleWord(true);
+        message.setFont(new Font("Serif", Font.PLAIN, 13));
+        message.setMargin(new Insets(15, 15, 15, 15));
+
+        JPanel button = new JPanel();
+
+        JButton continueb = new JButton("Continue to Palazzo Vecchio");
+        continueb.setFont(new Font("Serif", Font.BOLD, 14));
+        continueb.addActionListener(e -> {
+            dialog.dispose();
+            parentFrame.dispose();
+
+            synchronized (lock) {
+                completed = true;
+                lock.notify();
+            }
+        });
+        button.add(continueb);
+
+        dialog.add(header, BorderLayout.NORTH);
+        dialog.add(new JScrollPane(message), BorderLayout.CENTER);
+        dialog.add(button, BorderLayout.SOUTH);
+
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+
+class Cipher {
+    private boolean completed = false;
+    private final Object lock = new Object();
+
+    private static final Map<Character, Character> CIPHER_MAP = new HashMap<>();
+    static {
+        String plain = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String cipher = "TVhWS1BGWkhJSllRV0VSVEdVU0NBQkxET04=";
+
+        for (int i = 0; i < plain.length(); i++) {
+            CIPHER_MAP.put(new String(Base64.getDecoder().decode(cipher)).charAt(i), plain.charAt(i));
+        }
+    }
+
+    public Cipher(Scanner input) {
+        showIntroFrame();
+
+        waitForIntroCompletion();
+
+        System.out.println("\n\u001B[36m=== The Medici Cipher Challenge ===\u001B[0m");
+    }
+
+    private void showIntroFrame() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Palazzo Vecchio - The Black Plinth");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setSize(650, 400);
+            frame.setLayout(new BorderLayout(15, 15));
+
+            JPanel header = new JPanel();
+            header.setBackground(new Color(128, 0,0));
+            JLabel headerl = new JLabel("⚜️ The 's Secret");
+            headerl.setFont(new Font("Serif", Font.BOLD, 24));
+            headerl.setForeground(new Color(255, 215, 0));
+            header.add(headerl);
+
+            JTextArea story = new JTextArea(
+                "Palazzo Vecchio, Florence - 1503\n\n" +
+                "You enter the Hall of the Five Hundred, a vast chamber adorned\n" +
+                "with Renaissance frescoes. In the center stands the Black Plinth,\n" +
+                "an ancient stone monument bearing the  crest.\n\n" +
+                "Carved into its dark surface is an encrypted message.\n\n" +
+                "The  family, rulers of Florence and patrons of the arts,\n" +
+                "were also keepers of ancient secrets. They used an uncknown\n" +
+                "cipher to protect their most guarded knowledge.\n\n" +
+                "The inscription glows faintly in the torchlight...\n" +
+                "You must decipher it to proceed."
+            );
+
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+
+    private boolean introComplete = false;
+    private final Object introLock = new Object();
+
+    private void waitForIntroCompletion() {
+        synchronized (introLock) {
+            while (!introComplete) {
+                try {
+                    introLock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     public void waitForCompletion() {
