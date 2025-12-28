@@ -508,7 +508,9 @@ class LeonardoMirror {
         ));
         specchio.setBackground(Color.WHITE);
 
-        
+        String primo = ".oihccV ozzalaP eht ni htnilP kcalB eht keeS .tsap eht ot yek eht sdloh ";
+        String secondo = "ecnerolF fo ylimaf tseggiB ehT";
+        String text = primo + secondo;
 
         JTextArea texta = new JTextArea(text);
         texta.setEditable(false);
@@ -711,7 +713,65 @@ class Cipher {
 
         waitForIntroCompletion();
 
-        System.out.println("\n\u001B[36m=== The Medici Cipher Challenge ===\u001B[0m");
+        System.out.println("\n\u001B[36m=== The  Cipher Challenge ===\u001B[0m");
+        System.out.println("\nThe encrypted message on the Black Plinth:");
+        System.out.println("\u001B[43m");
+
+        String text = "KMWCP GMUAKP UPIASW MW CSP KMUY RFSGCP. " +
+        "MW CSP JPMU 1300, M EPGC OPCW KWCG CSP MXNUU. " +
+        "CPU WMYP: KMWCP MHLSHLPUL.";
+
+        System.out.println(text);
+        System.out.println("\u001b[0m");
+
+        System.out.println("\n\u001B[33mKnown cipher key:\u001B[0m");
+        System.out.println("M = A    |    C = T    |    P = E    |    S = H");
+        System.out.println("W = N    |    G = G    |    U = S    |    K = D");
+
+        System.out.println("\nDecode the message using the cipher key.");
+        System.out.println("Type 'hint' for help, 'decode' to auto-decode (-20p), or enter your answer:");
+
+        int attempts = 3;
+        
+
+        while (attempts > 0) {
+            System.out.println("\n>");
+            String response = input.nextLine().trim();
+
+            if (response.equalsIgnoreCase("hint")) {
+                System.out.println("\n\u001B[33mHint:\u001B[0m Look at the pattern 'KMWCP'");
+                System.out.println("Using the key: K=D, M=A, W=N, C=T, P=E");
+                System.out.println("This spells 'DANTE'!");
+                continue;
+            } else if (response.equalsIgnoreCase("decode")) {
+                escape.score -= 20;
+                String decoded = decodeCipher(response);
+                System.out.println("\n\u001B[32mAuto-decoded message:\u001B[0m");
+                System.out.println(decoded);
+                System.out.println("\n(You can now enter this as yuor answer)");
+                continue;
+            }
+
+            String normalizedAnswer = response.toUpperCase().replaceAll("[^A-Z0-9\\s", "");
+            String normalizedCorrect = correct.replaceAll("[^A-Z0-9\\s", "");
+
+            if (normalizedAnswer.equals(normalizedCorrect)) {
+                System.out.println("\n\u001B[32mCorrect! You've decoded the  cipher!\u001B[0m");
+
+                SwingUtilities.invokeLater(() -> showSuccessFrame());
+                break;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    System.out.println("\u001B[31mIncorrect decoding.\u001B[0m Attempts remaining: " + attempts);
+                } else {
+                    System.out.println("\n\u001B[31mYou've failed to decode the  cipher. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+
+        waitForCompletion();
     }
 
     private void showIntroFrame() {
@@ -740,6 +800,29 @@ class Cipher {
                 "The inscription glows faintly in the torchlight...\n" +
                 "You must decipher it to proceed."
             );
+            story.setEditable(false);
+            story.setLineWrap(true);
+            story.setWrapStyleWord(true);
+            story.setFont(new Font("Serif", Font.PLAIN, 14));
+            story.setMargin(new Insets(20, 30, 20, 30));
+            story.setBackground(new Color(245, 240, 230));
+
+            JPanel button = new JPanel();
+
+            JButton continueb = new JButton("Examine the Cipher");
+            continueb.setFont(new Font("Serif", Font.BOLD, 16));
+            continueb.addActionListener(e -> {
+                frame.dispose();
+                synchronized (introLock) {
+                    introComplete = true;
+                    introLock.notify();
+                }
+            });
+            button.add(continueb);
+
+            frame.add(header, BorderLayout.NORTH);
+            frame.add(new JScrollPane(story), BorderLayout.CENTER);
+            frame.add(button, BorderLayout.SOUTH);
 
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
@@ -759,6 +842,77 @@ class Cipher {
                 }
             }
         }
+    }
+
+    private String decodeCipher(String encrypted) {
+        StringBuilder decoded = new StringBuilder();
+        for (char c : encrypted.toCharArray()) {
+            if (Character.isLetter(c)) {
+                char upper = Character.toUpperCase(c);
+                char decrypted = CIPHER_MAP.getOrDefault(upper, upper);
+                decoded.append(decrypted);
+            } else {
+                decoded.append(c);
+            }
+        }
+        return decoded.toString();
+    }
+
+    private void showSuccessFrame() {
+        JFrame frame = new JFrame("The  Secret Revealed");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(650, 450);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("⚜️ Cipher Decoded Successfully", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 22));
+        header.setForeground(new Color(128, 0, 0));
+        header.setBorder(BorderFactory.createEmptyBorder(15, 0, 10, 0));
+
+        JTextArea message = new JTextArea(
+            "You've cracked the  cipher!\n\n" +
+            "\"DANTE GUARDS SECRETS OF THE DARK FUTURE.\n" +
+            "IN THE YEAR 1300, A POET WENT INTO THE ABYSS.\n" +
+            "HIS NAME: DANTE ALIGHIERI.\"\n\n" +
+            "As you speak the decoded words aloud, the Black Plinth begins\n" +
+            "to tremble. Ancient mechanism rumble deep beneath the\n" +
+            "Palazzo Vecchio.\n\n" +
+            "A section of the marble floor slides away, revealing a spiral\n" +
+            "staircase descending into darkness.\n\n" +
+            "Carved into the stone archway, you see words that send a\n" +
+            "chill down your spine:\n\n" +
+            "\"LASCIATE OGNE SPERANZA, VOI CH'INTRATE\"\n\n" +
+            "The passage leads backward through time...\n" +
+            "To Florence, 1300. To the age of Dante Alighieri."
+        );
+        message.setEditable(false);
+        message.setLineWrap(true);
+        message.setWrapStyleWord(true);
+        message.setFont(new Font("Serif", Font.PLAIN, 13));
+        message.setMargin(new Insets(15, 20, 15, 20));
+        message.setBackground(new Color(245, 240, 230));
+
+        JPanel button = new JPanel();
+
+        JButton continueb = new JButton("Descend into the Darkness");
+        continueb.setFont(new Font("Serif", Font.BOLD, 16));
+        continueb.setBackground(new Color(139, 0, 0));
+        continueb.setForeground(Color.WHITE);
+        continueb.addActionListener(e -> {
+            frame.dispose();
+            synchronized (lock) {
+                completed = true;
+                lock.notify();
+            }
+        });
+        button.add(continueb);
+
+        frame.add(header, BorderLayout.NORTH);
+        frame.add(new JScrollPane(message), BorderLayout.CENTER);
+        frame.add(button, BorderLayout.SOUTH);
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public void waitForCompletion() {
