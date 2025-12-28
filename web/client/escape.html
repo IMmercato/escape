@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="box">
-                    <p>To proceed, restore the scroll. (Type 1 for omen)</p>
+                    <p style="color: #ffd700;">To proceed, restore the scroll. (Type 1 for omen)</p>
                     <p class="info">Attempts left: <span id="attempts">3</span></p>
                     <p class="info">Score: <span id="score">100</span></p>
 
@@ -54,7 +54,7 @@
 
                     <div class="input-group">
                         <label>Enter the Secret Phrase:</label>
-                        <input type="text" id="psw">
+                        <input type="password" id="psw">
                     </div>
 
                     <button onclick="sumbitGate()">Invoke the Senate</button>
@@ -65,7 +65,8 @@
                 <div class="victory">
                     <h1>Access Granted</h1>
                     <div class="box success">
-                        <p id="finalMessage"></p>
+                        <p style="color: #ffd700; margin-bottom: 10px;" id="finalMessage"></p>
+                        <p style="color: #ffaa00;">Now it is your turn...</p>
                     </div>
                     <p class="info">Final Score: <span id="finalScore"></span></p>
                 </div>
@@ -83,8 +84,8 @@
         <div id="omen" class="modal">
             <div class="modal-content">
                 <h3>Omen of the Augurs</h3>
-                <p style="font-size: 2rem;" id="hint"></p>
-                <p style="font-style: italic; color: #ffaa00;" id="suggest"></p>
+                <p style="font-size: 2rem;" id="hint" class="hintp"></p>
+                <p style="font-style: italic; color: #ffaa00;" id="suggest" class="suggest"></p>
                 <button onclick="closeOmen()">Close</button>
             </div>
         </div>
