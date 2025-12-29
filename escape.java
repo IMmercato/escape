@@ -1573,3 +1573,86 @@ class VitruvianManPuzzle extends JFrame {
         }
     }
 }
+
+class ShipNavigationPuzzle extends JFrame {
+    private Chapter1492 parent;
+    private Point ship;
+    private Point destination;
+    private JLabel status;
+    private boolean navigating = false;
+
+    public ShipNavigationPuzzle(Chapter1492 parent) {
+        this.parent = parent;
+
+        setTitle("Stage 3: Navigate to the New World");
+        setSize(900, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        ship = new Point(150, 300);
+        destination = new Point(700, 300);
+
+        JLabel header = new JLabel("Stage 3: Navigate Columbs's Ship", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 20));
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>Use arrow keys to navigate the Santa Maria to the New World!<br>" + 
+            "Follow the stars and reach the red marker.</center></html>"
+        );
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        status = new JLabel("Distance to New World: Calculating...", SwingConstants.CENTER);
+        status.setFont(new Font("Serif", Font.BOLD, 14));
+
+        NavigationPanel nav = new NavigationPanel();
+        nav.setFocusable(true);
+        nav.requestFocusInWindow();
+
+        add(header, BorderLayout.NORTH);
+        add(nav, BorderLayout.CENTER);
+        add(instruction, BorderLayout.SOUTH);
+        add(status, BorderLayout.PAGE_END);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class NavigationPanel extends JPanel {
+        public NavigationPanel() {
+            setBackground(new Color(25, 25, 112));
+
+            addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    int speed = 15;
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP:
+                            ship.y = Math.max(0, ship.y - speed);
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            ship.y = Math.min(getHeight() - 30, ship.y + speed);
+                            break;
+                        case KeyEvent.VK_LEFT:
+                            ship.x = Math.max(0, ship.x - speed);
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            ship.x = Math.min(getWidth() - 30, ship.x + speed);
+                            break;
+                    }
+                    checkArrival();
+                    repaint();
+                }
+            });
+        }
+
+        private void checkArrival() {
+            if (ship.distance(destination) < 40) {
+                Timer timer = new Timer(500, e -> {
+                    
+                });
+            }
+        }
+    }
+}
