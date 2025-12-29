@@ -3,10 +3,15 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Scanner;
+import java.util.Set;
+
 import javax.swing.*;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class escape {
@@ -174,6 +179,16 @@ public class escape {
         for (Frame f : Frame.getFrames()) {
             f.dispose();
         }
+
+        System.out.println("\n\n\u001B[36m╔════════════════════════════════════╗\u001B[0m");
+        System.out.println("\u001B[36m║   CHAPTER IV: THE NEW WORLD        ║\u001B[0m");
+        System.out.println("\u001B[36m╚════════════════════════════════════╝\u001B[0m");
+
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
+
+        new Chapter1492(score);
 
         input.close();
         System.out.println("Final score: " + score);
@@ -1226,7 +1241,15 @@ class DanteInferno {
             ". CASSIUS - who betrayed Caesar\n\n" +
             "\"Now you see,\" Dante says solenly. \"The circle is complete.\n" +
             "Your journey began with Caesar's triumph - Veni, Vidi, Vici.\n" +
-            "It led through the Renaissance, where knowledge was rebron.\n"
+            "It led through the Renaissance, where knowledge was rebron.\n" +
+            "And now you witness the eternal punishment of htise who\n" +
+            "betrayed the greatest of Romans.\"\n\n" +
+            "From the frozen depths, a scroll emerges, preserved in ice \n" +
+            "for centuries. On it, a riddle:\n\n" +
+            "\"When the Genoese sailor finds the edge of known world,\n" +
+            "and the Renaissance man draws the perfect proportions,\n" +
+            "the final truth shall be revealed.\"\n\n" +
+            "The year 1492 calls to you..."
         );
         message.setEditable(false);
         message.setLineWrap(true);
