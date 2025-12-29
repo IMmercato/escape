@@ -1046,6 +1046,86 @@ class DanteInferno {
                 }
             }
         }
+
+        System.out.println("\n\u001B[36mDante continues:\u001B[0m");
+        System.out.println("\"In the center of the Ninth Circle, frozen in ice,");
+        System.out.println("Satan himself devours three traitors for eternity");
+        System.out.println("One betrayed Christ. Two betrayed Caesar on the Ides of March.\"");
+
+        System.out.println("\n\u001B[31mSecond Riddle:\u001B[0m");
+        System.out.println("Name TWO traitors who assassinated Julius Caesar.");
+        System.out.println("(Enter both names separated by 'and', e.g., 'Virgilio and Dante')");
+        System.out.println("You encountered their deed at the beginning of your journey...");
+
+        attempts = 3;
+        riddle = false;
+
+        while (attempts > 0 && !riddle) {
+            System.out.print("\n> ");
+            String answer = input.nextLine().trim().toLowerCase();
+
+            boolean primo = answer.contains(new String(Base64.getDecoder().decode("YnJ1dHVz"))) || answer.contains(new String(Base64.getDecoder().decode("YnJ1dG8=")));
+            boolean secondo = answer.contains(new String(Base64.getDecoder().decode("Y2Fzc2l1cw=="))) || answer.contains(new String(Base64.getDecoder().decode("Y2Fzc2lv")));
+
+            if (primo && secondo) {
+                System.out.println("\n\u001B[32mCorrect! Brutus and Cassius - the assassins of Caesar!\u001B[0m");
+                System.out.println("'Et tu, Brute?' - Caesar's final words echo through eternity.");
+                riddle = true;
+            } else if (primo || secondo) {
+                System.out.println("\u001B[33mYou have one correct, but TWO traitors killed Caesar.\u001B[0m");
+                attempts--;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    System.out.println("\u001B[31mIncorrect.\u001B[0m " + attempts + " attempts left.");
+                    if (attempts == 1) {
+                        System.out.println("\u001B[33mHint: Remember the 'Omen' from the Roman chapter - Idus Martiae.\u001B[0m");
+                    }
+                } else {
+                    System.out.println("\n\u001B[31mThe names of the traitors remain unknown. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+
+        System.out.println("\n\u001B[36mDante reveals:\u001B[0m");
+        System.out.println("\"Now you understand. The betrayel of Caesar connects all things.");
+        System.out.println("But to unlock the final secret, slove this mystery:\"");
+
+        System.out.println("\n\u001B[31mFinal Riddle:\u001B[0m");
+        System.out.println("How many circles must you descend to reach the traitors?");
+        System.out.println("How many daggers struck Caesar?");
+        System.out.println("On which day was Caesar killed?");
+        System.out.println("\nWhat is the sum? (int)");
+
+        attempts = 3;
+        riddle = false;
+
+        while (attempts > 0 && !riddle) {
+            System.out.print("\n> ");
+            String answer = input.nextLine().trim();
+
+            if (answer.equals(new String(Base64.getDecoder().decode("NDc=")))) {
+                System.out.println("\n\u001B[32mCorrect! 9 + 23 + 15 = 47\u001B[0m");
+                System.out.println("\nThe frozen lake at the center of Hell begins to crack...");
+                riddle = true;
+            } else {
+                attempts--;
+                if (attempts > 0 ) {
+                    System.out.println("\u001B[31mIncorrect calculation.\u001B[0m Attempts remaining: " + attempts);
+                    if (attempts == 1) {
+                        escape.score -= 10;
+                        System.out.println("\u001B[33mHint: 9 circles + 23 daggers + 15th of March\u001B[0m");
+                    }
+                } else {
+                    System.out.println("\n\u001B[31mThe path forward is sealed. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+
+        SwingUtilities.invokeLater(() -> showSuccessFrame());
+        waitForCompletion();
     }
 
     private boolean introComplete = false;
@@ -1123,6 +1203,55 @@ class DanteInferno {
                 }
             }
         }
+    }
+
+    private void showSuccessFrame() {
+        JFrame frame = new JFrame("The Heart of the Inferno");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(700, 550);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("The Ninth Circle Revealed", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 24));
+        header.setForeground(new Color(139, 0, 0));
+        header.setBorder(BorderFactory.createEmptyBorder(15, 0,10, 0));
+
+        JTextArea message = new JTextArea(
+            "You have descended through all Nine Circles.\n\n" +
+            "At the frozen center of Hell, you witness a terrifying sight:\n" +
+            "Satan himself, a gaint beast trapped in ice, eternaly devouring\n" +
+            "three traitors:\n\n" +
+            ". JUDAS ISCARIOT - who betrayed Christ\n" +
+            ". BRUTUS - who betrayed Caesar\n" +
+            ". CASSIUS - who betrayed Caesar\n\n" +
+            "\"Now you see,\" Dante says solenly. \"The circle is complete.\n" +
+            "Your journey began with Caesar's triumph - Veni, Vidi, Vici.\n" +
+            "It led through the Renaissance, where knowledge was rebron.\n"
+        );
+        message.setEditable(false);
+        message.setLineWrap(true);
+        message.setWrapStyleWord(true);
+        message.setFont(new Font("serif", Font.PLAIN, 13));
+        message.setMargin(new Insets(15, 20, 15, 20));
+
+        JPanel button = new JPanel();
+        JButton continueb = new JButton("Emerge from Hell -> 1492");
+        continueb.setFont(new Font("Serif", Font.BOLD, 16));
+        continueb.addActionListener(e -> {
+            frame.dispose();
+            synchronized (lock) {
+                completed = true;
+                lock.notify();
+            }
+        });
+        button.add(continueb);
+
+        frame.add(header, BorderLayout.NORTH);
+        frame.add(new JScrollPane(message), BorderLayout.CENTER);
+        frame.add(button, BorderLayout.SOUTH);
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public void waitForCompletion() {
