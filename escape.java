@@ -1302,6 +1302,10 @@ class Chapter1492 {
     public void startStage2() {
         new VitruvianManPuzzle(this);
     }
+
+    public void startStage3() {
+        new ShipNavigationPuzzle(this);
+    }
 }
 
 class InteractiveMapPuzzle extends JFrame {
@@ -1472,6 +1476,58 @@ class VitruvianManPuzzle extends JFrame {
                     handleClick(e.getPoint());
                 }
             });
+        }
+
+        @Override
+        public void paintComponents(Graphics g) {
+            super.paintComponents(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int cX = getWidth() / 2;
+            int cY = getHeight() / 2;
+
+            gr.setColor(new Color(200, 200, 200));
+            gr.setStroke(new BasicStroke(2));
+            gr.drawOval(cX - 150, cY - 150, 300, 300);
+
+            gr.drawRect(cX -120, cY -120, 240, 240);
+
+            gr.setColor(new Color(101, 67, 33));
+
+            gr.fillOval(cX - 25, cY - 120, 50, 50);
+            gr.fillOval(cX - 15, cY - 70, 30, 80);
+
+            gr.setStroke(new BasicStroke(8));
+            gr.drawLine(cY, cY - 50, cX - 100, cY -30);
+            gr.drawLine(cY, cY - 50, cX + 100, cY - 30);
+
+            gr.drawLine(cY, cY + 10, cX - 40, cY + 100);
+            gr.drawLine(cY, cY + 10, cX + 40, cY + 100);
+
+            gr.setColor(Color.RED);
+            int points [][] = {
+                {cX, cY - 95},
+                {cX, cY},
+                {cX, cY + 100}
+            };
+
+            for (int[] pt : points) {
+                gr.fillOval(pt[0] - 5, pt[1] - 5, 10, 10);
+            }
+
+            if (point1 != null) {
+                gr.setColor(Color.BLUE);
+                gr.fillOval(point1.x - 8, point1.y - 8, 16, 16);
+            }
+            if (point2 != null) {
+                gr.setColor(Color.GREEN);
+                gr.fillOval(point2.x - 8, point2.y - 8, 16, 16);
+
+                gr.setColor(Color.BLUE);
+                gr.setStroke(new BasicStroke(2));
+                gr.drawLine(point1.x, point1.y, point2.x, point2.y);
+            }
         }
 
         private void handleClick(Point p) {
