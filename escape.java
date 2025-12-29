@@ -1289,3 +1289,231 @@ class DanteInferno {
         }
     }
 }
+
+class Chapter1492 {
+    private int finalScore;
+
+    public Chapter1492(int score) {
+        this.finalScore = score;
+
+        new InteractiveMapPuzzle(this);
+    }
+
+    public void startStage2() {
+        new VitruvianManPuzzle(this);
+    }
+}
+
+class InteractiveMapPuzzle extends JFrame {
+    private Chapter1492 parent;
+    private Set<String> clickedL = new HashSet<>();
+    private JLabel status;
+
+    private Map<String, Point> locations = new HashMap<>();
+
+    public InteractiveMapPuzzle(Chapter1492 parent) {
+        this.parent = parent;
+
+        setTitle("Stage 1: Map the Journey");
+        setSize(900, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("Stage 1: Trace Your Journey Through Time", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 20));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>Click on the 4 locations you visited in chronological order.</center></html>");
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        MapPanel map = new MapPanel();
+
+        add(header, BorderLayout.NORTH);
+        add(instruction, BorderLayout.SOUTH);
+        add(map, BorderLayout.CENTER);
+        add(status, BorderLayout.PAGE_END);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class MapPanel extends JPanel {
+        private Map<String, Rectangle> locationA = new HashMap<>();
+
+        public MapPanel() {
+            setBackground(new Color(172, 216, 230));
+
+            locationA.put("Rome", new Rectangle(450, 280, 60, 60));
+            locationA.put("Florence", new Rectangle(100, 250, 60, 60));
+            locationA.put("Atlantic", new Rectangle(250, 300, 80, 80));
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    handleClick(e.getPoint());
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            gr.setColor(new Color(34, 139, 34));
+
+            gr.fillOval(400, 200, 200, 200);
+            gr.fillOval(380, 380, 150, 180);
+            gr.fillOval(100, 250, 120, 300);
+
+            gr.setColor(Color.RED);
+            gr.setFont(new Font("Serif", Font.BOLD, 14));
+
+            for (Map.Entry<String, Rectangle> entry : locationA.entrySet()) {
+                Rectangle r = entry.getValue();
+
+                if (clickedL.contains(entry.getKey())) {
+                    gr.setColor(new Color(0, 200, 0));
+                    gr.fillOval(r.x, r.y, r.width, r.height);
+                    gr.setColor(Color.WHITE);
+                    gr.drawString("✓", r.x + 20, r.y + 20);
+                } else {
+                    gr.setColor(Color.RED);
+                    gr.fillOval(r.x, r.y, r.width, r.height);
+                    gr.setColor(Color.WHITE);
+                    gr.drawString("?", r.x + 20, r.y + 20);
+                }
+
+                gr.setColor(Color.BLACK);
+                gr.drawString(entry.getKey(), r.x - 10, r.y - 10);
+            }
+
+            gr.setColor(Color.BLACK);
+            gr.drawString("Timeline: 44 BC → 1503 → 1300 → 1492", 200, 600);
+        }
+
+        private void handleClick(Point p) {
+            for (Map.Entry<String, Rectangle> entry : locationA.entrySet()) {
+                clickedL.add(entry.getKey());
+                status.setText("Location found: " + clickedL.size() + "/4 - " + entry.getKey() + " marked!");
+                repaint();
+
+                if (clickedL.size() >= 3) {
+                    Timer timer = new Timer(1000, e -> {
+                        JOptionPane.showMessageDialog(InteractiveMapPuzzle.this, 
+                            "Excellent! You've traced the journey through time.\n\n" +
+                            "Now, let's explore the mathematics of perfection...",
+                            "Stage 1 Complete!",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                        dispose();
+                        parent.startStage2();
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
+                }
+                break;
+            }
+        }
+    }
+}
+
+class VitruvianManPuzzle extends JFrame {
+    private Chapter1492 parent;
+    private JLabel result;
+    private Point point1 = null;
+    private Point point2 = null;
+    private int measurements = 0;
+
+    public VitruvianManPuzzle(Chapter1492 parent) {
+        this.parent = parent;
+
+        setTitle("Stage 2: The Vitruvian Man");
+        setSize(800, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("Stage 2: Measure the Golden Ratio", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 20));
+
+        JPanel instruction = new JPanel(new BorderLayout());
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>Click two points on the Vitruvian Man to measure.<br>" +
+        "Find measurements that approximate the Golden Ratio φ</center></html>"
+        );
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions, BorderLayout.CENTER);
+
+        result = new JLabel("Click two points to measure", SwingConstants.CENTER);
+        result.setFont(new Font("Serif", Font.BOLD, 14));
+        instruction.add(result, BorderLayout.SOUTH);
+
+        VitruvianPanel vitruvian = new VitruvianPanel();
+
+        add(header, BorderLayout.NORTH);
+        add(vitruvian, BorderLayout.CENTER);
+        add(instruction, BorderLayout.SOUTH);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class VitruvianPanel extends JPanel {
+        public VitruvianPanel() {
+            setBackground(new Color(250, 240, 230));
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    handleClick(e.getPoint());
+                }
+            });
+        }
+
+        private void handleClick(Point p) {
+            if (point1 == null) {
+                point1 = p;
+                result.setText("First point selected. Click second point.");
+            } else if (point2 == null) {
+                point2 = p;
+
+                double d = Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+                measurements++;
+
+                result.setText("Distance: " + (int)d + " pixels");
+
+                if (measurements >= 2) {
+                    Timer timer = new Timer(1500, e -> {
+                        int response = JOptionPane.showConfirmDialog(VitruvianManPuzzle.this, 
+                            "The Golden Ratio φ ≈ 1.618 governs perfect proportions.\n\n" +
+                            "The ratio of total height to navel height ≈ 1.618\n" +
+                            "This divine proportion appears throughout nature and art.\n\n" +
+                            "Do you understand the Golden Ratio?",
+                            "Stage 2 Complete!",
+                            JOptionPane.YES_NO_OPTION
+                        );
+
+                        if (response == JOptionPane.YES_OPTION) {
+                            dispose();
+                            parent.startStage3();
+                        }
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
+                }
+
+                Timer rTimer = new Timer(2000, e -> {
+                    point1 = null;
+                    point2 = null;
+                    repaint();
+                });
+                rTimer.setRepeats(false);
+                rTimer.start();
+            }
+        }
+    }
+}
