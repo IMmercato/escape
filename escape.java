@@ -164,7 +164,16 @@ public class escape {
             f.dispose();
         }
 
+        System.out.println("\n\n\u001B[31m╔════════════════════════════════════╗\u001B[0m");
+        System.out.println("\u001B[31m║   CHAPTER III: DANTE'S INFERNO     ║\u001B[0m");
+        System.out.println("\u001B[31m╚════════════════════════════════════╝\u001B[0m");
+        System.out.println("\nFlorence, Year 1300...\n");
 
+        new DanteInferno(input);
+
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
 
         input.close();
         System.out.println("Final score: " + score);
@@ -784,7 +793,7 @@ class MediciCipher {
                         "HIS NAME: DANTE ALIGHIERI.";
 
         while (attempts > 0) {
-            System.out.println("\n>");
+            System.out.print("\n>");
             String response = input.nextLine().trim();
 
             if (response.equalsIgnoreCase("hint")) {
@@ -962,6 +971,158 @@ class MediciCipher {
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+
+class DanteInferno {
+    private boolean completed = false;
+    private final Object lock = new Object();
+
+    private static final String CIRCLES [] = {
+        "First Circle - Limbo (Virtuous Pagans)",
+        "Second Circle - Lust",
+        "Third Circle - Gluttony",
+        "Fourth Circle - Greed",
+        "Fifth Circle - Wrath",
+        "Sixth Circle - Heresy",
+        "Seventh Circle - Violence",
+        "Eighth Circle - Fraud",
+        "Ninth Circle - Treachery"
+    };
+
+    public DanteInferno(Scanner input) {
+        showIntroFrame();
+        waitForIntroCompletion();
+
+        System.out.println("\n\u001B[31m=== Journey Through the Nine Circles ===\u001B[0m");
+        System.out.println("\nYou stand at the gates of the Hell with the poet Dante as your guide.");
+        System.out.println("To find the secret you seek, you must answer riddles from the circles.\n");
+
+        System.out.println("\u001B[33mThe nine Circles of Hell:\u001B[0m");
+        for (int i = 0; i < CIRCLES.length; i++) {
+            System.out.println((i + 1) + ". " + CIRCLES[i]);
+        }
+
+        System.out.println("\n\u001B[36mDante speaks:\u001B[0m");
+        System.out.println("\"The answer you seek lies in the deepest circle,");
+        System.out.println("where the greatest traitors are punished for eternity.\"");
+
+        System.out.println("\n\u001B[31mFirst Riddle:\u001B[0m");
+        System.out.println("In which circle are traitors punished?");
+        System.out.println("(Enter the circle number: 1-9)");
+
+        int attempts = 3;
+        boolean riddle = false;
+
+        while (attempts > 0 && !riddle) {
+            System.out.print("\n>");
+            String answer = input.nextLine().trim();
+
+            if (answer.equals(String.valueOf((int) (Math.PI * 3)))) {
+                System.out.println("\n\u001B[32mCorrect! The Ninth Circle - Treachery.\u001B[0m");
+                riddle = true;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    System.out.println("\u001B[31mWrong circle.\u001B[0m Attempts remaining: " + attempts);
+                    if (attempts == 1) {
+                        System.out.println("\u001B[33mHint: It's the LOWEST circle, the worst of all sins.\u001B[0m");
+                    }
+                } else {
+                    System.out.println("\n\u001B[31mYou are lost in the circles, AntiInferno attends you. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+    }
+
+    private boolean introComplete = false;
+    private final Object introLock = new Object();
+
+    private void showIntroFrame() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("The Gates of Hell");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setSize(700, 500);
+            frame.setLayout(new BorderLayout(10, 10));
+
+            JPanel header = new JPanel();
+            header.setBackground(new Color(80, 0, 0));
+            JLabel headerl = new JLabel("Dante's Inferno - Anno 1300");
+            headerl.setFont(new Font("Serif", Font.BOLD, 26));
+            headerl.setForeground(new Color(255, 100, 100));
+            header.add(headerl);
+
+            JTextArea story = new JTextArea(
+                "Florence, Year 1300 - Good Fridat\n\n" +
+                "You find yourself in a dark wood, the straight way lost.\n\n" +
+                "A figure emerges from the shadows - the poet Dante Alighieri,\n" +
+                "author of the Divine Comedy. He has journeyed through Hell itself\n" +
+                "and lived to tell the tale.\n\n" +
+                "\"I know why you have come,\" Dante says, his eyes haunted by\n" +
+                "visions of the damned. \"You seek the connection between\n" +
+                "Caesar's fall and the mysteries that followed.\"\n\n" +
+                "He points to a dark gateway carved into the earth.\n" +
+                "Above it, words are insctibed in stone:\n\n" +
+                "\"LASCIATE OGNE SPERANZA; VOI CH'INTRATE\"\n\n" +
+                "\"The answer lies in the deepest circle,\" Dante whispers.\n" +
+                "\"Where the greatest traitors are punished.\n" +
+                "Come, I shall be your guide through the Nine Circles of Hell.\""
+            );
+            story.setEditable(false);
+            story.setLineWrap(true);
+            story.setWrapStyleWord(true);
+            story.setFont(new Font("Serif", Font.PLAIN, 14));
+            story.setMargin(new Insets(20, 30, 20,30));
+            story.setBackground(new Color(20, 20, 20));
+            story.setForeground(new Color(220, 220, 220));
+
+            JPanel button = new JPanel();
+            button.setBackground(new Color(40, 40, 4));
+            JButton enter = new JButton("Enter the Inferno");
+            enter.setFont(new Font("Serif", Font.BOLD, 16));
+            enter.setBackground(new Color(139, 0, 0));
+            enter.setForeground(Color.WHITE);
+            enter.addActionListener(e -> {
+                frame.dispose();
+                synchronized (introLock) {
+                    introComplete = true;
+                    introLock.notify();
+                }
+            });
+            button.add(enter);
+
+            frame.add(header, BorderLayout.NORTH);
+            frame.add(new JScrollPane(story), BorderLayout.CENTER);
+            frame.add(button, BorderLayout.SOUTH);
+
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+
+    private void waitForIntroCompletion() {
+        synchronized (introLock) {
+            while (!introComplete) {
+                try {
+                    introLock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     public void waitForCompletion() {
