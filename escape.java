@@ -6,12 +6,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Scanner;
-import java.util.Set;
-
+import java.util.List;
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 public class escape {
@@ -188,7 +187,7 @@ public class escape {
             f.dispose();
         }
 
-        new Chapter1492(score);
+        new Chapter1492();
 
         input.close();
         System.out.println("Final score: " + score);
@@ -770,12 +769,14 @@ class MediciCipher {
     private final Object lock = new Object();
 
     private static final Map<Character, Character> CIPHER_MAP = new HashMap<>();
+    private static final Map<Character, Character> DECODE_MAP = new HashMap<>();
     static {
         String plain = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String cipher = "TVhWS1BGWkhJSllRV0VSVEdVU0NBQkxET04=";
 
         for (int i = 0; i < plain.length(); i++) {
-            CIPHER_MAP.put(new String(Base64.getDecoder().decode(cipher)).charAt(i), plain.charAt(i));
+            CIPHER_MAP.put(plain.charAt(i), new String(Base64.getDecoder().decode(cipher)).charAt(i));
+            DECODE_MAP.put(new String(Base64.getDecoder().decode(cipher)).charAt(i), plain.charAt(i));
         }
     }
 
@@ -818,15 +819,15 @@ class MediciCipher {
                 continue;
             } else if (response.equalsIgnoreCase("decode")) {
                 escape.score -= 20;
-                String decoded = decodeMediciCipher(response);
+                String decoded = decodeMediciCipher(text);
                 System.out.println("\n\u001B[32mAuto-decoded message:\u001B[0m");
                 System.out.println(decoded);
                 System.out.println("\n(You can now enter this as yuor answer)");
                 continue;
             }
 
-            String normalizedAnswer = response.toUpperCase().replaceAll("[^A-Z0-9\\s", "");
-            String normalizedCorrect = correct.replaceAll("[^A-Z0-9\\s", "");
+            String normalizedAnswer = response.toUpperCase().replaceAll("[^A-Z0-9\\s]", "");
+            String normalizedCorrect = correct.replaceAll("[^A-Z0-9\\s]", "");
 
             if (normalizedAnswer.equals(normalizedCorrect)) {
                 System.out.println("\n\u001B[32mCorrect! You've decoded the Medici cipher!\u001B[0m");
@@ -835,6 +836,7 @@ class MediciCipher {
                 break;
             } else {
                 attempts--;
+                escape.score -= 10;
                 if (attempts > 0) {
                     System.out.println("\u001B[31mIncorrect decoding.\u001B[0m Attempts remaining: " + attempts);
                 } else {
@@ -922,8 +924,8 @@ class MediciCipher {
         for (char c : encrypted.toCharArray()) {
             if (Character.isLetter(c)) {
                 char upper = Character.toUpperCase(c);
-                char decrypted = CIPHER_MAP.getOrDefault(upper, upper);
-                decoded.append(decrypted);
+                char decrypted = DECODE_MAP.getOrDefault(upper, upper);
+                decoded.append(Character.isLowerCase(c) ? Character.toLowerCase(decrypted) : decrypted);
             } else {
                 decoded.append(c);
             }
@@ -1291,11 +1293,15 @@ class DanteInferno {
 }
 
 class Chapter1492 {
-    private int finalScore;
+    private boolean completed = false;
+    private final Object lock = new Object();
 
-    public Chapter1492(int score) {
-        this.finalScore = score;
+    // DEBUG
+    public static void main(String[] args) {
+        new Chapter1492();
+    }
 
+    public Chapter1492() {
         new InteractiveMapPuzzle(this);
     }
 
@@ -1306,14 +1312,26 @@ class Chapter1492 {
     public void startStage3() {
         new ShipNavigationPuzzle(this);
     }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
 }
 
 class InteractiveMapPuzzle extends JFrame {
     private Chapter1492 parent;
-    private Set<String> clickedL = new HashSet<>();
+    private List<String> clickedO = new ArrayList<>();
     private JLabel status;
-
-    private Map<String, Point> locations = new HashMap<>();
+    private String order [] = {"Um9tZQ==", "RmxvcmVuY2U=", "RmxvcmVuY2U=", "QXRsYW50aWM="};
+    private int step = 0;
 
     public InteractiveMapPuzzle(Chapter1492 parent) {
         this.parent = parent;
@@ -1333,6 +1351,9 @@ class InteractiveMapPuzzle extends JFrame {
         instructions.setFont(new Font("Serif", Font.ITALIC, 13));
         instruction.add(instructions);
 
+        status = new JLabel("Click locations to brgin your journey", SwingConstants.CENTER);
+        status.setFont(new Font("Serif", Font.ITALIC, 12));
+
         MapPanel map = new MapPanel();
 
         add(header, BorderLayout.NORTH);
@@ -1346,13 +1367,19 @@ class InteractiveMapPuzzle extends JFrame {
 
     class MapPanel extends JPanel {
         private Map<String, Rectangle> locationA = new HashMap<>();
+        private Map<String, Point> locationC = new HashMap<>();
 
         public MapPanel() {
-            setBackground(new Color(172, 216, 230));
+            setBackground(new Color(135, 206, 230));
 
-            locationA.put("Rome", new Rectangle(450, 280, 60, 60));
-            locationA.put("Florence", new Rectangle(100, 250, 60, 60));
-            locationA.put("Atlantic", new Rectangle(250, 300, 80, 80));
+            locationA.put("Rome", new Rectangle(580, 280, 50, 50));
+            locationC.put("Rome", new Point(605, 305));
+
+            locationA.put("Florence", new Rectangle(560, 230, 50, 50));
+            locationC.put("Florence", new Point(585, 255));
+
+            locationA.put("Atlantic", new Rectangle(300, 300, 60, 60));
+            locationC.put("Atlantic", new Point(330, 330));
 
             addMouseListener(new MouseAdapter() {
                 @Override
@@ -1370,21 +1397,37 @@ class InteractiveMapPuzzle extends JFrame {
 
             gr.setColor(new Color(34, 139, 34));
 
-            gr.fillOval(400, 200, 200, 200);
-            gr.fillOval(380, 380, 150, 180);
-            gr.fillOval(100, 250, 120, 300);
+            gr.fillOval(50, 150, 140, 200);
+            gr.fillOval(80, 320, 100, 180);
+            gr.fillOval(520, 180, 200, 180);
+            gr.fillOval(540, 320, 160, 200);
+            gr.fillOval(680, 200, 250, 220);
+
+            gr.setColor(new Color(100, 149, 237));
+            gr.setStroke(new BasicStroke(2));
+            for (int i = 0; i < 5; i++) {
+                gr.drawArc(250 + i * 30, 250, 30, 20, 0, 180);
+                gr.drawArc(250 + i * 30, 250, 30, 20, 0, 180);
+            }
 
             gr.setColor(Color.RED);
             gr.setFont(new Font("Serif", Font.BOLD, 14));
 
             for (Map.Entry<String, Rectangle> entry : locationA.entrySet()) {
+                String l = entry.getKey();
                 Rectangle r = entry.getValue();
 
-                if (clickedL.contains(entry.getKey())) {
+                int clickI = clickedO.indexOf(l);
+                boolean isClicked = clickI >= 0;
+
+                if (isClicked) {
                     gr.setColor(new Color(0, 200, 0));
                     gr.fillOval(r.x, r.y, r.width, r.height);
                     gr.setColor(Color.WHITE);
                     gr.drawString("✓", r.x + 20, r.y + 20);
+
+                    gr.setColor(Color.YELLOW);
+                    gr.drawString(String.valueOf(clickI + 1), r.x + 5, r.y + 10);
                 } else {
                     gr.setColor(Color.RED);
                     gr.fillOval(r.x, r.y, r.width, r.height);
@@ -1397,30 +1440,57 @@ class InteractiveMapPuzzle extends JFrame {
             }
 
             gr.setColor(Color.BLACK);
-            gr.drawString("Timeline: 44 BC → 1503 → 1300 → 1492", 200, 600);
+            gr.setFont(new Font("Serif", Font.BOLD, 14));
+            gr.drawString("Journey Timeline:", 350, 560);
+            gr.setFont(new Font("Serif", Font.PLAIN, 13));
+            gr.drawString("Timeline: 44 BC → 1503 → 1300 → 1492", 250, 670);
         }
 
         private void handleClick(Point p) {
             for (Map.Entry<String, Rectangle> entry : locationA.entrySet()) {
-                clickedL.add(entry.getKey());
-                status.setText("Location found: " + clickedL.size() + "/4 - " + entry.getKey() + " marked!");
-                repaint();
+                if (entry.getValue().contains(p)) {
+                    String clickedL = entry.getKey();
+                    String expectedL = new String(Base64.getDecoder().decode(order[step]));
+                    
+                    if (clickedL.equals(expectedL)) {
+                        clickedO.add(clickedL);
+                        step++;
 
-                if (clickedL.size() >= 3) {
-                    Timer timer = new Timer(1000, e -> {
+                        if (step == 1) {
+                            status.setText("Step 2/4");
+                        } else if (step == 2) {
+                            status.setText("Step 3/4");
+                        } else if (step == 3) {
+                            status.setText("Step 4/4");
+                        } else if (step >= 4) {
+                            status.setText("Journey Complete! Well done!");
+                            status.setForeground(new Color(0, 128, 0));
+
+                            Timer timer = new Timer(1000, e -> {
+                                JOptionPane.showMessageDialog(InteractiveMapPuzzle.this, 
+                                    "Excellent! You've traced the journey through time.\n\n" +
+                                    "Now, let's explore the mathematics of perfection...",
+                                    "Stage 1 Complete!",
+                                    JOptionPane.INFORMATION_MESSAGE
+                                );
+                                dispose();
+                                 parent.startStage2();
+                                });
+                                timer.setRepeats(false);
+                                timer.start();
+                            }
+                            repaint();
+                    } else {
                         JOptionPane.showMessageDialog(InteractiveMapPuzzle.this, 
-                            "Excellent! You've traced the journey through time.\n\n" +
-                            "Now, let's explore the mathematics of perfection...",
-                            "Stage 1 Complete!",
-                            JOptionPane.INFORMATION_MESSAGE
+                            "Wrong location! You need to click them in chronological order.\n" +
+                            "Expected: " + expectedL + "\n" +
+                            "You clicked: " + clickedL,
+                            "Incorrect Order",
+                            JOptionPane.WARNING_MESSAGE
                         );
-                        dispose();
-                        parent.startStage2();
-                    });
-                    timer.setRepeats(false);
-                    timer.start();
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -1650,8 +1720,18 @@ class ShipNavigationPuzzle extends JFrame {
         private void checkArrival() {
             if (ship.distance(destination) < 40) {
                 Timer timer = new Timer(500, e -> {
-                    
+                    JOptionPane.showMessageDialog(ShipNavigationPuzzle.this, 
+                        "Land ho! You've reached the New World!\n\n" +
+                        "October 12, 1492 - A date that changed history.\n\n" +
+                        "Your journey through sea is complete.",
+                        "Victory!",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                    dispose();
+                    parent.waitForCompletion();
                 });
+                timer.setRepeats(false);
+                timer.start();
             }
         }
     }
