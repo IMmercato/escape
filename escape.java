@@ -12,9 +12,36 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class escape {
     public static int score = 100;
+
+    public static final Color P_COLOR = new Color(139, 0, 0);
+    public static final Color S_COLOR = new Color(212, 175, 55);
+    public static final Color SUCCESS_COLOR = new Color(0, 128, 0);
+    public static final Color ERROR_COLOR = new Color(139, 0, 0);
+    public static final Color I_COLOR = new Color(0, 0, 139);
+    public static final Color WARNING_COLOR = new Color(218, 165, 32);
+    public static final Color BG_COLOR = new Color(245, 240, 230);
+    public static final Color D_RED = new Color(128, 0, 0);
+    public static final Color D_BROWN = new Color(101, 67, 33);
+    public static final Color L_BROWN = new Color(245, 235, 220);
+    public static final Color GOLD = new Color(255, 215, 0);
+    public static final Color D_BG = new Color(20, 20, 20);
+    public static final Color L_TEXT = new Color(220, 220, 220);
+
+    public static final Font T_FONT = new Font("Serif", Font.BOLD, 24);
+    public static final Font H_FONT = new Font("Serif", Font.BOLD, 20);
+    public static final Font B_FONT = new Font("Serif", Font.PLAIN, 14);
+
+    public static void printChapter(String title, String color) {
+        String border = "╔════════════════════════════════════╗";
+        System.out.println("\n\n\u001B[" + color + "m" + border + "\u001B[0m");
+        System.out.printf("\u001B[%sm║   %-32s ║\u001B[0m\n", color, title);
+        System.out.println("\u001B[" + color + "m" + border + "\u001B[0m\n");
+    }
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
@@ -108,9 +135,7 @@ public class escape {
             }
         }
 
-        System.out.println("\n\n\u001B[35m╔════════════════════════════════════╗\u001B[0m");
-        System.out.println("\u001B[35m║   CHAPTER II: THE RENAISSANCE      ║\u001B[0m");
-        System.out.println("\u001B[35m╔════════════════════════════════════╗\u001B[0m");
+        printChapter("CHAPTER II: THE RENAISSANCE", "35");
         System.out.println("\nFlorence, 1503...");
 
         LeonardoMirror leonardo = new LeonardoMirror();
@@ -168,9 +193,7 @@ public class escape {
             f.dispose();
         }
 
-        System.out.println("\n\n\u001B[31m╔════════════════════════════════════╗\u001B[0m");
-        System.out.println("\u001B[31m║   CHAPTER III: DANTE'S INFERNO     ║\u001B[0m");
-        System.out.println("\u001B[31m╚════════════════════════════════════╝\u001B[0m");
+        printChapter("CHAPTER III: DANTE'S INFERNO", "31");
         System.out.println("\nFlorence, Year 1300...\n");
 
         new DanteInferno(input);
@@ -179,15 +202,25 @@ public class escape {
             f.dispose();
         }
 
-        System.out.println("\n\n\u001B[36m╔════════════════════════════════════╗\u001B[0m");
-        System.out.println("\u001B[36m║   CHAPTER IV: THE NEW WORLD        ║\u001B[0m");
-        System.out.println("\u001B[36m╚════════════════════════════════════╝\u001B[0m");
+        printChapter("CHAPTER IV: THE NEW WORLD", "36");
 
         for (Frame f : Frame.getFrames()) {
             f.dispose();
         }
 
         new Chapter1492();
+
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
+
+        printChapter("CHAPTER V: THE MAYA", "33");
+
+        new MayanChapter(input);
+
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
 
         input.close();
         System.out.println("Final score: " + score);
@@ -1502,6 +1535,7 @@ class VitruvianManPuzzle extends JFrame {
     private Point point1 = null;
     private Point point2 = null;
     private int measurements = 0;
+    private boolean completed = false;
 
     public VitruvianManPuzzle(Chapter1492 parent) {
         this.parent = parent;
@@ -1522,7 +1556,7 @@ class VitruvianManPuzzle extends JFrame {
         instructions.setFont(new Font("Serif", Font.ITALIC, 13));
         instruction.add(instructions, BorderLayout.CENTER);
 
-        result = new JLabel("Click two points to measure", SwingConstants.CENTER);
+        result = new JLabel("Click two points to measure (0/2 measurments)", SwingConstants.CENTER);
         result.setFont(new Font("Serif", Font.BOLD, 14));
         instruction.add(result, BorderLayout.SOUTH);
 
@@ -1549,8 +1583,8 @@ class VitruvianManPuzzle extends JFrame {
         }
 
         @Override
-        public void paintComponents(Graphics g) {
-            super.paintComponents(g);
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
             Graphics2D gr = (Graphics2D) g;
             gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -1560,7 +1594,6 @@ class VitruvianManPuzzle extends JFrame {
             gr.setColor(new Color(200, 200, 200));
             gr.setStroke(new BasicStroke(2));
             gr.drawOval(cX - 150, cY - 150, 300, 300);
-
             gr.drawRect(cX -120, cY -120, 240, 240);
 
             gr.setColor(new Color(101, 67, 33));
@@ -1569,11 +1602,11 @@ class VitruvianManPuzzle extends JFrame {
             gr.fillOval(cX - 15, cY - 70, 30, 80);
 
             gr.setStroke(new BasicStroke(8));
-            gr.drawLine(cY, cY - 50, cX - 100, cY -30);
-            gr.drawLine(cY, cY - 50, cX + 100, cY - 30);
+            gr.drawLine(cX, cY - 50, cX - 100, cY -30);
+            gr.drawLine(cX, cY - 50, cX + 100, cY - 30);
 
-            gr.drawLine(cY, cY + 10, cX - 40, cY + 100);
-            gr.drawLine(cY, cY + 10, cX + 40, cY + 100);
+            gr.drawLine(cX, cY + 10, cX - 40, cY + 100);
+            gr.drawLine(cX, cY + 10, cX + 40, cY + 100);
 
             gr.setColor(Color.RED);
             int points [][] = {
@@ -1601,6 +1634,8 @@ class VitruvianManPuzzle extends JFrame {
         }
 
         private void handleClick(Point p) {
+            if (completed) return;
+
             if (point1 == null) {
                 point1 = p;
                 result.setText("First point selected. Click second point.");
@@ -1613,6 +1648,7 @@ class VitruvianManPuzzle extends JFrame {
                 result.setText("Distance: " + (int)d + " pixels");
 
                 if (measurements >= 2) {
+                    completed = true;
                     Timer timer = new Timer(1500, e -> {
                         int response = JOptionPane.showConfirmDialog(VitruvianManPuzzle.this, 
                             "The Golden Ratio φ ≈ 1.618 governs perfect proportions.\n\n" +
@@ -1626,19 +1662,21 @@ class VitruvianManPuzzle extends JFrame {
                         if (response == JOptionPane.YES_OPTION) {
                             dispose();
                             parent.startStage3();
+                        } else {
+                            completed = false;
                         }
                     });
                     timer.setRepeats(false);
                     timer.start();
+                } else {
+                    Timer rTimer = new Timer(2000, e -> {
+                        point1 = null;
+                        point2 = null;
+                        repaint();
+                    });
+                    rTimer.setRepeats(false);
+                    rTimer.start();
                 }
-
-                Timer rTimer = new Timer(2000, e -> {
-                    point1 = null;
-                    point2 = null;
-                    repaint();
-                });
-                rTimer.setRepeats(false);
-                rTimer.start();
             }
         }
     }
@@ -1649,7 +1687,7 @@ class ShipNavigationPuzzle extends JFrame {
     private Point ship;
     private Point destination;
     private JLabel status;
-    private boolean navigating = false;
+    private boolean arrived = false;
 
     public ShipNavigationPuzzle(Chapter1492 parent) {
         this.parent = parent;
@@ -1687,6 +1725,8 @@ class ShipNavigationPuzzle extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+
+        SwingUtilities.invokeLater(() -> nav.requestFocusInWindow());
     }
 
     class NavigationPanel extends JPanel {
@@ -1711,10 +1751,50 @@ class ShipNavigationPuzzle extends JFrame {
                             ship.x = Math.min(getWidth() - 30, ship.x + speed);
                             break;
                     }
+                    updateDistance();
                     checkArrival();
                     repaint();
                 }
             });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            gr.setColor(Color.WHITE);
+            Random rand = new Random(42);
+            for (int i = 0; i < 100; i++) {
+                int x = rand.nextInt(getWidth());
+                int y = rand.nextInt(getHeight());
+                gr.fillOval(x, y, 2, 2);
+            }
+
+            gr.setColor(Color.YELLOW);
+            gr.fillOval(getWidth() / 2, 30, 8, 8);
+            gr.setFont(new Font("Serif", Font.ITALIC, 12));
+            gr.drawString("North Star", getWidth() / 2 - 30, 25);
+
+            gr.setColor(Color.RED);
+            gr.fillOval(destination.x - 15, destination.y - 15, 30, 30);
+            gr.setColor(Color.WHITE);
+            gr.drawString("NEW WORLD", destination.x - 25, destination.y + 20);
+
+            gr.setColor(new Color(139, 69, 19));
+            gr.fillRect(ship.x, ship.y, 30, 15);
+            gr.setColor(Color.WHITE);
+            gr.fillPolygon(new int[]{ship.x + 15, ship.x + 15, ship.x + 25},
+                           new int[]{ship.y - 20, ship.y, ship.y - 10}, 3);
+        }
+
+        private void updateDistance() {
+            int distance = (int)ship.distance(destination);
+            status.setText("Distance to New World: " + distance + " leagues");
+            if (distance < 100) {
+                status.setForeground(new Color(0, 128, 0));
+            }
         }
 
         private void checkArrival() {
@@ -1732,6 +1812,130 @@ class ShipNavigationPuzzle extends JFrame {
                 });
                 timer.setRepeats(false);
                 timer.start();
+            }
+        }
+    }
+}
+
+class MayanChapter {
+    private boolean completed = false;
+    private final Object lock = new  Object();
+
+    public MayanChapter(Scanner input) {
+        showIntroFrame();
+        waitForIntroComplete();
+
+        System.out.println("\n\u001B[33m=== The Mayan Temple ===\u001B[0m");
+        System.out.println("\nYou explore the ancient ruins. The Maya were master mathematicians.");
+        System.out.println("They invented the concept of ZERO independently, like the ancient Indians.");
+        System.out.println("Their number system used base-20 (vigesimal) instead of base-10.\n");
+
+        System.out.println("\u001B[36mThe Mayan priest speaks:\u001B[0m");
+        System.out.println("\"Our ancestors recorded knowledge in numbers and stars.");
+        System.out.println("To unlock the temple, you must understand our sacred calendar.\"\n");
+        
+        System.out.println("\u001B[31mFirst Riddle:\u001B[0m");
+        System.out.println("The Mayan sacred calendar (Tzolk'in) had how many days?");
+        System.out.println("Hint: It's 13 x 20");
+
+        int attempts = 3;
+        boolean solved = false;
+
+        while (attempts > 0 && !solved) {
+            System.out.print("\n> ");
+            String answer = input.nextLine().trim();
+
+            if (answer.equals("")) {
+                System.out.println("\n\u001B[32mCorrect! 260 days in the Tzolk'in.\u001B[0m");
+                solved = true;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    System.out.println("\u001B[31m✗ Incorrect.\u001B[0m Attempts remaining: " + attempts);
+                    if (attempts == 1) {
+                        System.out.println("\u001B[33mHint: 13 x 20 = ?\u001B[0m");
+                    }
+                } else {
+                    System.out.println("\n\u001B[31mThe temple remains sealed. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+    }
+
+    private boolean introComplete = false;
+    private final Object introLock = new Object();
+
+    private void showIntroFrame() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("The New World - 1492");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setSize(700, 550);
+            frame.setLayout(new BorderLayout(10, 10));
+            
+            JPanel header = new JPanel();
+            header.setBackground(new Color(34, 139, 34));
+            JLabel hJLabel = new JLabel("Chapter V: The Maya Civilization");
+            hJLabel.setFont(escape.T_FONT);
+            hJLabel.setForeground(new Color(255, 215, 0));
+            header.add(hJLabel);
+
+            JTextArea text = new JTextArea(
+                "The Caribbean Coast, October 1492\n\n" +
+                "Columbus's ships land on the shores of a world unknown to Europe.\n" +
+                "But this is not an empty land - it is home to great civilizations.\n\n" +
+                "Venturing inland, you discover towering stone pyramids covered in\n" +
+                "jungle vines. The ruins of the Maya - master astronomers, mathematicians,\n" +
+                "and builders of magnificent cities.\n\n" +
+                "A Mayan priest emerges from the temple shadows.\n" +
+                "\"We have been expecting you,\" he says in a language you somehow\n" +
+                "understand. \"Your journey through time has brought you here for a reason.\"\n\n" +
+                "He points to the pyramids:\n" +
+                "\"Our ancestors built these monuments to track the stars and seasons.\n" +
+                "We calculated time with precision. We understood zero before your world.\n" +
+                "And we share knowledge with another civilization across the great water -\n" +
+                "a civilization that also built pyramids to touch the sky.\"\n\n" +
+                "\"Prove your understanding of our wisdom, and the connection will\n" +
+                "be revealed.\""
+            );
+            text.setEditable(false);
+            text.setLineWrap(true);
+            text.setWrapStyleWord(true);
+            text.setFont(escape.B_FONT);
+            text.setMargin(new Insets(20, 25, 20, 25));
+            text.setBackground(new Color(245, 245, 220));
+
+            JButton button = new JButton("Enter the Temple");
+            button.setFont(new Font("Serif", Font.BOLD, 16));
+            button.setBackground(new Color(139, 69, 19));
+            button.setForeground(Color.WHITE);
+            button.addActionListener(e -> {
+                frame.dispose();
+                synchronized (introLock) {
+                    introComplete = true;
+                    introLock.notify();
+                }
+            });
+            JPanel btnPanel = new JPanel();
+            btnPanel.add(button);
+
+            frame.add(header, BorderLayout.NORTH);
+            frame.add(new JScrollPane(text), BorderLayout.CENTER);
+            frame.add(button, BorderLayout.SOUTH);
+
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+
+    private void waitForIntroComplete() {
+        synchronized (introLock) {
+            while (!introComplete) {
+                try {
+                    introLock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }
