@@ -1687,7 +1687,6 @@ class ShipNavigationPuzzle extends JFrame {
     private Point ship;
     private Point destination;
     private JLabel status;
-    private boolean arrived = false;
 
     public ShipNavigationPuzzle(Chapter1492 parent) {
         this.parent = parent;
@@ -1821,6 +1820,11 @@ class MayanChapter {
     private boolean completed = false;
     private final Object lock = new  Object();
 
+    // DEBUG
+    public static void main(String[] args) {
+        new MayanChapter(new Scanner(System.in));
+    }
+
     public MayanChapter(Scanner input) {
         showIntroFrame();
         waitForIntroComplete();
@@ -1861,6 +1865,81 @@ class MayanChapter {
                 }
             }
         }
+
+        System.out.println("\n\u001B[36mThe priest continues:\u001B[0m");
+        System.out.println("\"We observed the sky with precision unknown to your world.");
+        System.out.println("We calculated the solar year to 365.2420 days.");
+        System.out.println("We tracked Venus, predicted eclipses, and built pyramids");
+        System.out.println("aligned to the stars... just like another ancient civilization.\"\n");
+        
+        System.out.println("\u001B[31mSecond Riddle:\u001B[0m");
+        System.out.println("Our pyramids point to the heavens, as do those across the sea.");
+        System.out.println("Which ancient civilization also built pyramids aligned to stars?");
+        System.out.println("(Hint: They're in Africa, along the Nile River)");
+
+        attempts = 3;
+        solved = false;
+
+        while (attempts > 0 && !solved) {
+            System.out.print("\n> ");
+            String answer = input.nextLine().trim().toLowerCase();
+
+            if (answer.contains("") || answer.contains("")) {
+                System.out.println("\n\u001B[32m✓ Correct! The Egyptians!\u001B[0m");
+                System.out.println("\nBoth civilizations built pyramids without contact...");
+                System.out.println("Or did they share ancient knowledge from a common source?");
+                solved = true;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    System.out.println("\u001B[31m✗ Try again.\u001B[0m Attempts remaining: " + attempts);
+                } else {
+                    System.out.println("\n\u001B[31mThe connection is lost. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+
+        System.out.println("\n\u001B[36mThe priest reveals a stone tablet:\u001B[0m");
+        System.out.println("\"Both Maya and Egypt understood sacred geometry.");
+        System.out.println("Both tracked the stars with incredible accuracy.");
+        System.out.println("Both built monuments that align with celestial events.\"\n");
+        
+        System.out.println("\u001B[31mFinal Challenge:\u001B[0m");
+        System.out.println("What is the sacred number found in both civilizations?");
+        System.out.println("- Sides of the Great Pyramid base");
+        System.out.println("- Cardinal directions (N, S, E, W)");
+        System.out.println("- Elements in ancient philosophy");
+        System.out.println("\n(Enter a single digit)");
+
+        attempts = 3;
+        solved = false;
+
+        while (attempts > 0 && !solved) {
+            System.out.print("\n> ");
+            String answer = input.nextLine().trim();
+
+            if (answer.equals("")) {
+                System.out.println("\n\u001B[32mCorrect! The sacred number FOUR!\u001B[0m");
+                System.out.println("\n4 sides of the pyramid");
+                System.out.println("4 cardinal directions");
+                System.out.println("4 elements (Earth, Air, Fire, Water)");
+                System.out.println("4 seasons of the year");
+                System.out.println("\nThe temple door opens, revealing a passage...");
+                solved = true;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    System.out.println("\u001B[31m✗ Incorrect.\u001B[0m Attempts remaining: " + attempts);
+                } else {
+                    System.out.println("\n\u001B[31mThe sacred number remains hidden. Game Over.\u001B[0m");
+                    System.exit(0);
+                }
+            }
+        }
+
+        SwingUtilities.invokeLater(() -> showGlyphPuzzle());
+        waitForCompletion();
     }
 
     private boolean introComplete = false;
@@ -1933,6 +2012,102 @@ class MayanChapter {
             while (!introComplete) {
                 try {
                     introLock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+
+    private void showGlyphPuzzle() {
+        JFrame frame = new JFrame("Mayan Glyph Puzzle");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(650, 500);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("Match the Mayan Numbers", SwingConstants.CENTER);
+        header.setFont(escape.H_FONT);
+        header.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>The Maya used dots (•) and bars (—) for numbers:<br>" + "• = 1, — = 5<br>" + "Match the symbols to their values!</center></html>");
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        JPanel play = new JPanel(new GridLayout(4, 2, 20, 20));
+        play.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        play.setBackground(escape.BG_COLOR);
+
+        String glyphs [] = {"• • •", "—", "— •", "— — • •"};
+        String values [] = {"3", "5", "6", "12"};
+
+        final boolean matches [] = new boolean[glyphs.length];
+
+        for (int i = 0; i < glyphs.length; i++) {
+            JLabel glyphL = new JLabel(glyphs[i], SwingConstants.CENTER);
+            glyphL.setFont(new Font("Monospaced", Font.BOLD, 24));
+            glyphL.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+            glyphL.setOpaque(true);
+            glyphL.setBackground(Color.WHITE);
+
+            JComboBox<String> combo = new JComboBox<>(values);
+            combo.setSelectedIndex(-1);
+            combo.setFont(escape.B_FONT);
+
+            final int index = i;
+            combo.addActionListener(e -> {
+                if (combo.getSelectedItem().equals(values[index])) {
+                    glyphL.setBackground(new Color(144, 238, 144));
+                    matches[index] = true;
+
+                    int tot = 0;
+                    for (boolean isCorrect : matches) {
+                        if (isCorrect) tot++;
+                    }
+                    if (tot >= 4) {
+                        Timer timer = new Timer(500, evt -> {
+                            JOptionPane.showMessageDialog(frame, 
+                                "Excellent! You understand Mayan mathematics.\n\n" +
+                                "The priest nods: \"You have proven your wisdom.\n" +
+                                "Now journey across time to the land of the Pharaohs,\n" +
+                                "where the same cosmic knowledge was preserved.\"\n\n" +
+                                "A portal opens, leading to ancient Egypt...",
+                                "Temple Unlocked!",
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                            frame.dispose();
+                            synchronized (lock) {
+                                completed = true;
+                                lock.notify();
+                            }
+                        });
+                        timer.setRepeats(false);
+                        timer.start();
+                    }
+                } else {
+                    glyphL.setBackground(Color.WHITE);
+                    matches[index] = false;
+                }
+            });
+
+            play.add(glyphL);
+            play.add(combo);
+        }
+
+        frame.add(header, BorderLayout.NORTH);
+        frame.add(instruction, BorderLayout.SOUTH);
+        frame.add(play, BorderLayout.CENTER);
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
