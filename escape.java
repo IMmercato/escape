@@ -5,6 +5,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.Scanner;
 import java.util.List;
 import javax.swing.*;
@@ -2110,6 +2111,192 @@ class MayanChapter {
                     lock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+
+class EgyptianChapter {
+    // DEBUG
+    public static void main(String[] args) {
+        new PyramidAlignmentPuzzle(null);
+    }
+
+    public EgyptianChapter() {
+        new PyramidAlignmentPuzzle(this);
+    }
+}
+
+class PyramidAlignmentPuzzle extends JFrame {
+    private EgyptianChapter parent;
+    private List<Stars> stars = new ArrayList<>();
+    private int alignedStars = 0;
+
+    public PyramidAlignmentPuzzle(EgyptianChapter parent) {
+        this.parent = parent;
+
+        setTitle("Stage 1: Align the Pyramids");
+        setSize(800, 700);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("⭐ Align the Stars with the Pyramids of Giza", SwingConstants.CENTER);
+        header.setFont(escape.H_FONT);
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>The Great Pyramids align with Orion's Belt.<br>" + "Drag the 3 stars to align with the pyramid peaks!</center></html>");
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        Pyramid pyramid = new Pyramid();
+
+        add(header, BorderLayout.NORTH);
+        add(instruction, BorderLayout.SOUTH);
+        add(pyramid, BorderLayout.CENTER);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class Stars {
+        Point position;
+        boolean dragging = false;
+        boolean aligned = false;
+
+        public Stars(int x, int y) {
+            position = new Point(x, y);
+        }
+
+        public boolean contains(Point p) {
+            return position.distance(p) < 15;
+        }
+    }
+
+    class Pyramid extends JPanel {
+        private Stars draggedStar = null;
+
+        public Pyramid() {
+            setBackground(new Color(25, 25, 60));
+
+            stars.add(new Stars(100, 100));
+            stars.add(new Stars(200, 100));
+            stars.add(new Stars(300, 100));
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    for (Stars star : stars) {
+                        if (star.contains(e.getPoint()) && !star.aligned) {
+                            draggedStar = star;
+                            star.dragging = true;
+                            break;
+                        }
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (draggedStar != null) {
+                        draggedStar.dragging = false;
+                        checkAlignment(draggedStar);
+                        draggedStar = null;
+                        repaint();
+                    }
+                }
+            });
+
+            addMouseMotionListener(new MouseMotionAdapter() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if (draggedStar != null) {
+                        draggedStar.position = e.getPoint();
+                        repaint();
+                    }
+                }
+            });
+
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            gr.setColor(Color.WHITE);
+            Random rand = new Random(123);
+            for (int i = 0; i < 80; i++) {
+                int x = rand.nextInt(getWidth());
+                int y = rand.nextInt(getHeight() / 2);
+                gr.fillOval(x, y, 2, 2);
+            }
+
+            gr.setColor(new Color(194, 178, 128));
+            gr.fillRect(0, getHeight() / 2, getWidth(), getHeight() /2);
+
+            int pyramidX [] = {150, 400, 650};
+            for (int x : pyramidX) {
+                gr.setColor(new Color(205, 175, 149));
+                int xP [] = {x, x - 80, x + 80};
+                int yP [] = {200, 450, 450};
+                gr.fillPolygon(xP, yP, 3);
+
+                gr.setColor(new Color(255, 215, 0, 100));
+                gr.fillOval(x - 20, 180, 40, 40);
+            }
+
+            for (Stars star : stars) {
+                if (star.aligned) {
+                    gr.setColor(new Color(0, 255, 0));
+                } else if (star.dragging) {
+                    gr.setColor(new Color(255, 255, 0));
+                } else {
+                    gr.setColor(new Color(255, 200, 100));
+                }
+
+                int x = star.position.x;
+                int y = star.position.y;
+                gr.fillOval(x -10, y - 10, 20, 20);
+
+                for (int i = 0; i < 5; i++) {
+                    double angle = Math.toRadians(i * 72 - 90);
+                    int px = x + (int)(15 * Math.cos(angle));
+                    int py = y + (int)(15 * Math.sin(angle));
+                    gr.drawLine(x, y, px, py);
+                }
+            }
+        }
+
+        private void checkAlignment(Stars star) {
+            int pyramidX [] = {150, 400, 650};
+
+            for (int x : pyramidX) {
+                if (star.position.distance(new Point(x, 200)) < 30) {
+                    star.position = new Point(x, 200);
+                    if (!star.aligned) {
+                        star.aligned = true;
+                        alignedStars++;
+
+                        if (alignedStars >= 3) {
+                            Timer timer = new Timer(1000, e -> {
+                                JOptionPane.showMessageDialog(PyramidAlignmentPuzzle.this,
+                                    "Perfect alignment! The pyramids match Orion's Belt.\n\n" +
+                                    "This astronomical precision proves the ancient knowledge\n" +
+                                    "shared between Maya and Egypt.\n\n" +
+                                    "Both civilizations tracked the same stars...",
+                                    "Stage 1 Complete!",
+                                    JOptionPane.INFORMATION_MESSAGE
+                                );
+                                dispose();
+                                //parent.startStage2;
+                            });
+                            timer.setRepeats(false);
+                            timer.start();
+                        }
+                    }
+                    break;
                 }
             }
         }
