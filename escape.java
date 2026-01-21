@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -2132,7 +2133,7 @@ class EgyptianChapter {
 
     // DEBUG
     public static void main(String[] args) {
-        new HieroglyphDecoder(null);
+        new SphinxRiddle(null);
     }
 
     public EgyptianChapter() {
@@ -2144,7 +2145,7 @@ class EgyptianChapter {
     }
 
     public void startStage3() {
-        //new
+        new SphinxRiddle(this);
     }
 
     public void waitForCompletion() {
@@ -2529,6 +2530,113 @@ class HieroglyphDecoder extends JFrame {
             feedbackLabel.setForeground(escape.ERROR_COLOR);
             inputField.selectAll();
             inputField.requestFocus();
+        }
+    }
+}
+
+class SphinxRiddle extends JFrame {
+    private EgyptianChapter parent;
+    private boolean completed = false;
+    private final Object lock = new Object();
+
+    public SphinxRiddle(EgyptianChapter parent) {
+        this.parent = parent;
+        setTitle("Stage 3: The Sphinx");
+        setSize(700, 600);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(15, 15));
+
+        JPanel header = new JPanel();
+        header.setBackground(new Color(139, 69, 19)); // D_BROWN
+        JLabel headerL = new JLabel("The Great Sphinx of Giza", SwingConstants.CENTER);
+        headerL.setFont(escape.T_FONT);
+        headerL.setForeground(Color.WHITE);
+        header.add(headerL);
+
+        JTextArea story = new JTextArea(
+            "Before you stands the Great Sphinx, guardian of the pyramids.\n\n" +
+            "The Sphinx speaks in a voice like distant thunder:\n\n" +
+            "\"Traveler from distant times, you have journeyed from\n" +
+            "Caesar's Rome through Dante's Hell, from Renaissance Florence\n" +
+            "to the New World of the Maya, and now to ancient Egypt.\"\n\n" +
+            "\"You have seen that knowledge connects all civilizations.\n" +
+            "Now answer my ancient riddle:\"\n\n" +
+            "THE RIDDLE OF THE SPHINX:\n\n" +
+            "\"What walks on four legs in the morning,\n" +
+            "two legs at noon,\n" +
+            "and three legs in the evening?\""
+        );
+        story.setEditable(false);
+        story.setLineWrap(true);
+        story.setWrapStyleWord(true);
+        story.setFont(new Font("Serif", Font.PLAIN, 14));
+        story.setBackground(new Color(245, 222, 179));
+        story.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        JTextField answer = new JTextField(25);
+        answer.setFont(new Font("Serif", Font.PLAIN, 16));
+        answer.setHorizontalAlignment(JTextField.CENTER);
+
+        JButton submit = new JButton("Answer the Sphinx");
+        submit.setFont(new Font("Serif", Font.BOLD, 16));
+        submit.setBackground(new Color(139, 69, 19));
+        submit.setForeground(Color.WHITE);
+        submit.setFocusPainted(false);
+        submit.addActionListener(e -> checkAnswer(answer));
+
+        JPanel input = new JPanel();
+        input.setBackground(new Color(245, 222, 179));
+        input.add(Box.createVerticalStrut(10));
+        input.add(answer);
+        input.add(Box.createVerticalStrut(10));
+        input.add(submit);
+
+        add(header, BorderLayout.NORTH);
+        add(new JScrollPane(story), BorderLayout.CENTER);
+        add(input, BorderLayout.SOUTH);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private void checkAnswer(JTextField input) {
+        String answer = input.getText().trim().toLowerCase();
+        String[] correctAnswers = {"man", "human", "person"};
+
+        if (Arrays.stream(correctAnswers).anyMatch(answer::contains)) {
+            JOptionPane.showMessageDialog(this,
+                "CORRECT!\n\n" +
+                "Just as Oedipus once answered me,\n" +
+                "so too have you proven your wisdom.\n\n" +
+                "The path ahead is revealed...",
+                "Stage 3 Complete!",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            dispose();
+            synchronized (lock) {
+                completed = true;
+                lock.notify();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "The Sphinx remains silent.\nThink about the stages of human life...",
+                "Try Again",
+                JOptionPane.WARNING_MESSAGE
+            );
+            input.setText("");
+            input.requestFocusInWindow();
+        }
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
     }
 }
