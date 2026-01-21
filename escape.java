@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.Scanner;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -219,6 +220,14 @@ public class escape {
 
         new MayanChapter(input);
 
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
+
+        printChapter("CHAPTER VI: EGYPTIAN", "35");
+
+        EgyptianChapter egyptian = new EgyptianChapter();
+        egyptian.waitForCompletion();
         for (Frame f : Frame.getFrames()) {
             f.dispose();
         }
@@ -2118,13 +2127,36 @@ class MayanChapter {
 }
 
 class EgyptianChapter {
+    private boolean completed = false;
+    private Object lock = new Object();
+
     // DEBUG
     public static void main(String[] args) {
-        new PyramidAlignmentPuzzle(null);
+        new HieroglyphDecoder(null);
     }
 
     public EgyptianChapter() {
         new PyramidAlignmentPuzzle(this);
+    }
+
+    public void startStage2() {
+        new HieroglyphDecoder(this);
+    }
+
+    public void startStage3() {
+        //new
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 }
 
@@ -2290,7 +2322,7 @@ class PyramidAlignmentPuzzle extends JFrame {
                                     JOptionPane.INFORMATION_MESSAGE
                                 );
                                 dispose();
-                                //parent.startStage2;
+                                parent.startStage2();
                             });
                             timer.setRepeats(false);
                             timer.start();
@@ -2299,6 +2331,204 @@ class PyramidAlignmentPuzzle extends JFrame {
                     break;
                 }
             }
+        }
+    }
+}
+
+class HieroglyphDecoder extends JFrame {
+    private EgyptianChapter parent;
+    private JTextField inputField;
+    private JLabel feedbackLabel;
+
+    private static final String[] FULL_GLYPHS = {"𓃭", "𓇋", "𓏏", "𓇌"};
+    private static final String MISSING_INDEX = "2";
+
+    public HieroglyphDecoder(EgyptianChapter parent) {
+        this.parent = parent;
+        setTitle("Stage 2: The Broken Tablet");
+        setSize(800, 700);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setupUI();
+        setVisible(true);
+    }
+
+    private void setupUI() {
+        setLayout(new BorderLayout(15, 15));
+        getContentPane().setBackground(escape.BG_COLOR);
+
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(escape.D_BROWN);
+        JLabel headerLabel = new JLabel(" Decode the Ancient Message ", SwingConstants.CENTER);
+        headerLabel.setFont(escape.H_FONT);
+        headerLabel.setForeground(Color.WHITE);
+        headerPanel.add(headerLabel);
+
+        JTextArea story = new JTextArea(
+            "Inside the Great Pyramid\n" +
+            "You discover a cracked and weathered tablet.\n" +
+            "Time has eroded part of the inscription...\n" +
+            "Only fragments of the sacred message remain visible."
+        );
+        story.setEditable(false);
+        story.setLineWrap(true);
+        story.setWrapStyleWord(true);
+        story.setFont(escape.B_FONT);
+        story.setBackground(escape.L_BROWN);
+        story.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        story.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        StringBuilder ruinedGlyphText = new StringBuilder();
+        for (int i = 0; i < FULL_GLYPHS.length; i++) {
+            if (String.valueOf(i).equals(MISSING_INDEX)) {
+                ruinedGlyphText.append(" ? "); // faded/missing glyph
+            } else {
+                ruinedGlyphText.append(" ").append(FULL_GLYPHS[i]).append(" ");
+            }
+        }
+
+        JPanel glyphPanel = new JPanel();
+        glyphPanel.setBackground(escape.L_BROWN);
+        glyphPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(Color.BLACK, 2),
+            "Ruined Tablet (One Symbol Missing)",
+            TitledBorder.CENTER,
+            TitledBorder.TOP,
+            escape.B_FONT
+        ));
+        JLabel glyphLabel = new JLabel(ruinedGlyphText.toString());
+        glyphLabel.setFont(new Font("Segoe UI Historic", Font.BOLD, 60));
+        glyphLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        glyphPanel.add(glyphLabel);
+
+        JPanel keyPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        keyPanel.setBackground(escape.L_BROWN);
+        keyPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(Color.BLACK, 2),
+            "Hieroglyph Key",
+            TitledBorder.CENTER,
+            TitledBorder.TOP,
+            escape.B_FONT
+        ));
+
+        addKeyEntry(keyPanel, "𓃭", "L", "Lion");
+        addKeyEntry(keyPanel, "𓇋", "I", "Reed");
+        addKeyEntry(keyPanel, "𓏏", "F", "Bread");
+        addKeyEntry(keyPanel, "𓇌", "E", "Sun");
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setBackground(escape.BG_COLOR);
+        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JLabel prompt = new JLabel("What 4-letter word do these hieroglyphs spell?", SwingConstants.CENTER);
+        prompt.setFont(escape.H_FONT.deriveFont(16f));
+        prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        inputField = new JTextField(15);
+        inputField.setFont(new Font("Serif", Font.BOLD, 20));
+        inputField.setHorizontalAlignment(JTextField.CENTER);
+        inputField.setMaximumSize(new Dimension(300, 40));
+        inputField.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        feedbackLabel = new JLabel(" ", SwingConstants.CENTER);
+        feedbackLabel.setFont(escape.B_FONT.deriveFont(Font.ITALIC, 14f));
+        feedbackLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        inputPanel.add(Box.createVerticalStrut(10));
+        inputPanel.add(prompt);
+        inputPanel.add(Box.createVerticalStrut(10));
+        inputPanel.add(inputField);
+        inputPanel.add(Box.createVerticalStrut(5));
+        inputPanel.add(feedbackLabel);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(escape.BG_COLOR);
+
+        JButton submitBtn = new JButton("Submit Answer");
+        submitBtn.setFont(escape.B_FONT.deriveFont(Font.BOLD, 16f));
+        submitBtn.setBackground(escape.D_BROWN);
+        submitBtn.setForeground(Color.WHITE);
+        submitBtn.setFocusPainted(false);
+        submitBtn.addActionListener(e -> checkAnswer());
+
+        JButton hintBtn = new JButton("Need Hint? (-20p)");
+        hintBtn.setFont(escape.B_FONT);
+        hintBtn.setBackground(escape.WARNING_COLOR);
+        hintBtn.setForeground(Color.BLACK);
+        hintBtn.setFocusPainted(false);
+        hintBtn.addActionListener(e -> showHint());
+
+        buttonPanel.add(hintBtn);
+        buttonPanel.add(submitBtn);
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBackground(escape.BG_COLOR);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        centerPanel.add(story);
+        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(glyphPanel);
+        centerPanel.add(Box.createVerticalStrut(15));
+        centerPanel.add(keyPanel);
+        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(inputPanel);
+
+        add(headerPanel, BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        getRootPane().setDefaultButton(submitBtn);
+        inputField.requestFocusInWindow();
+    }
+
+    private void addKeyEntry(JPanel panel, String glyph, String letter, String name) {
+        JPanel entry = new JPanel(new FlowLayout());
+        entry.setBackground(escape.L_BROWN);
+        entry.setBorder(BorderFactory.createEtchedBorder());
+        JLabel g = new JLabel(glyph);
+        g.setFont(new Font("Segoe UI Historic", Font.BOLD, 24));
+        JLabel desc = new JLabel(letter + " (" + name + ")");
+        desc.setFont(escape.B_FONT);
+        entry.add(g);
+        entry.add(desc);
+        panel.add(entry);
+    }
+
+    private void showHint() {
+        escape.score -= 20;
+        JOptionPane.showMessageDialog(this,
+            "💡 HINT: The missing symbol is the THIRD one.\n" +
+            "The full sequence represents a core Egyptian belief:\n" +
+            "L - I - ? - E → Think of what they sought in the afterlife.",
+            "Ancient Wisdom",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    private void checkAnswer() {
+        String ans = inputField.getText().trim().toUpperCase();
+        if (ans.equals("")) {
+            feedbackLabel.setText("Correct!");
+            feedbackLabel.setForeground(escape.SUCCESS_COLOR);
+            JOptionPane.showMessageDialog(this,
+                "CORRECT!\n" +
+                "The complete message is 'LIFE' — 𓃭 (L), 𓇋 (I), 𓏏 (F), 𓇌 (E).\n" +
+                "\nEven though time broke the tablet,\n" +
+                "your wisdom restored its meaning.\n" +
+                "The chamber trembles... a hidden door opens.",
+                "Stage 2 Complete!",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            dispose();
+            if (parent != null) {
+                parent.startStage3();
+            }
+        } else {
+            feedbackLabel.setText("Incorrect — try again!");
+            feedbackLabel.setForeground(escape.ERROR_COLOR);
+            inputField.selectAll();
+            inputField.requestFocus();
         }
     }
 }
