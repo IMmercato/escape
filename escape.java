@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -2636,6 +2639,176 @@ class SphinxRiddle extends JFrame {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+            }
+        }
+    }
+}
+
+class AlexanderChapter {
+    public static void main(String[] args) {
+        new ConquestMapPuzzle(null);
+    }
+
+    public AlexanderChapter() {
+        new ConquestMapPuzzle(this);
+    }
+}
+
+class ConquestMapPuzzle extends JFrame {
+    private AlexanderChapter parent;
+    private Set<String> conquered = new HashSet<>();
+    private JLabel status;
+    private String current = null;
+
+    public ConquestMapPuzzle(AlexanderChapter parent) {
+        this.parent = parent;
+
+        setTitle("Stage 1: Alexander's Conquests");
+        setSize(1000, 700);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("⚔️ Trace Alexander's Path of Conquest (336-323 BC)", SwingConstants.CENTER);
+        header.setFont(escape.H_FONT);
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>Click on territories to conquer them.<br>" + 
+        "Each conquest requires proving your strategic mind!</center></html>");
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        status = new JLabel("Begin your conquest! Click any territory to start.", SwingConstants.CENTER);
+        status.setFont(new Font("Serif", Font.BOLD, 14));
+
+        Conquest conquest = new Conquest();
+
+        add(header, BorderLayout.NORTH);
+        add(instruction, BorderLayout.SOUTH);
+        add(conquest, BorderLayout.CENTER);
+        add(status, BorderLayout.PAGE_END);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class Conquest extends JPanel {
+        private Map<String, Rectangle> territories = new LinkedHashMap<>();
+
+        public Conquest() {
+            setBackground(new Color(245, 222, 179));
+
+            territories.put("Egypt", new Rectangle(450, 380, 80, 60));
+            territories.put("Persia", new Rectangle(600, 300, 100, 80));
+            territories.put("India", new Rectangle(750, 330, 90, 90));
+            territories.put("Sri Lanka", new Rectangle(800, 440, 70, 50));
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    handleClick(e.getPoint());
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            gr.setColor(new Color(173, 216, 230));
+            gr.fillRect(0, 0, getWidth(), getHeight());
+
+            gr.setColor(new Color(144, 238, 144));
+
+            gr.fillOval(300, 250, 500, 300);
+            gr.fillOval(350, 350, 200, 250);
+            gr.fillOval(600, 280, 400, 350);
+
+            gr.setFont(new Font("Serif", Font.BOLD, 14));
+            for (Map.Entry<String, Rectangle> entry : territories.entrySet()) {
+                Rectangle r = entry.getValue();
+                String name = entry.getKey();
+
+                if (conquered.contains(name)) {
+                    gr.setColor(new Color(255, 215, 0));
+                    gr.fillRect(r.x, r.y, r.width, r.height);
+                    gr.setColor(new Color(139, 0, 0));
+                    gr.drawString("" + name, r.x + 10, r.y + r.height / 2 + 5);
+                } else {
+                    gr.setColor(new Color(200, 200, 200));
+                    gr.fillRect(r.x, r.y, r.width, r.height);
+                    gr.setColor(Color.BLACK);
+                    gr.drawString(name, r.x + 10, r.y + r.height / 2 + 5);
+                }
+
+                gr.setColor(Color.BLACK);
+                gr.drawRect(r.x, r.y, r.width, r.height);
+            }
+
+            gr.setColor(Color.RED);
+            gr.fillOval(380, 280, 15, 15);
+            gr.setColor(Color.BLACK);
+            gr.drawString("Macedonia", 360, 275);
+
+            if (conquered.size() > 0) {
+                gr.setColor(new Color(139, 0, 0));
+                gr.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                Point start = new Point(387, 287);
+
+                for (String territory : territories.keySet()) {
+                    if (conquered.contains(territory)) {
+                        Rectangle r = territories.get(territory);
+                        Point end = new Point(r.x + r.width / 2, r.y + r.height / 2);
+                        gr.drawLine(start.x, start.y, end.x, end.y);
+                        start = end;
+                    }
+                }
+            }
+        }
+
+        private void handleClick(Point p) {
+            for (Map.Entry<String, Rectangle> entry : territories.entrySet()) {
+                String territory = entry.getKey();
+                if (entry.getValue().contains(p) && !conquered.contains(territory)) {
+                    current = territory;
+                    territoryChallenge(territory);
+                    break;
+                }
+            }
+        }
+
+        private void territoryChallenge(String territory) {
+            switch (territory) {
+                case "Egypt":
+                    egyptChallenge();
+                    break;
+            }
+        }
+
+        private void egyptChallenge() {
+            String answer = JOptionPane.showInputDialog(ConquestMapPuzzle.this,
+                "EGYPT - 332 BC\n\n" +
+                "To conquer Egypt, you must prove your divine right.\n" +
+                "The Egyptians worshipped Alexander as the son of which god?\n\n" +
+                "(Hint: God of the sun, Egyptian supreme deity)",
+                "Conquer Egypt",
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            String x [] = {"", "", ""};
+
+            if (answer != null && Arrays.stream(x).anyMatch(answer::contains)) {
+                conquered.add("Egypt");
+                status.setText("Egypt conquered! Alexander is Pharaoh!");
+                repaint();
+            } else {
+                JOptionPane.showMessageDialog(ConquestMapPuzzle.this, 
+                    "Wrong! The Egyptians did not accept you as their ruler.",
+                    "Failed",
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
