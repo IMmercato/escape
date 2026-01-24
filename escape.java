@@ -2784,6 +2784,15 @@ class ConquestMapPuzzle extends JFrame {
                 case "Egypt":
                     egyptChallenge();
                     break;
+                case "Persia":
+                    persiaChallenge();
+                    break;
+                case "India":
+                    indiaChallenge();
+                    break;
+                case "Sri Lanka":
+                    slChallenge();
+                    break;
             }
         }
 
@@ -2803,12 +2812,114 @@ class ConquestMapPuzzle extends JFrame {
                 conquered.add("Egypt");
                 status.setText("Egypt conquered! Alexander is Pharaoh!");
                 repaint();
+                check();
             } else {
                 JOptionPane.showMessageDialog(ConquestMapPuzzle.this, 
                     "Wrong! The Egyptians did not accept you as their ruler.",
                     "Failed",
                     JOptionPane.ERROR_MESSAGE
                 );
+            }
+        }
+
+        private void persiaChallenge() {
+            String options [] = {"", "", ""};
+            int choice = JOptionPane.showOptionDialog(ConquestMapPuzzle.this, 
+                "PERSIA - 331 BC\n\n" +
+                "Alexander defeated Darius III of Persia in which decisive battle?\n" +
+                "This victory made him King of Persia.",
+                "Conquer Persia",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+            );
+
+            if (choice == 0) {
+                conquered.add("Persia");
+                status.setText("Persia conquered! You are now King of Kings!");
+                repaint();
+                check();
+            } else {
+                JOptionPane.showMessageDialog(ConquestMapPuzzle.this,
+                    "Incorrect! Darius escapes and your conquest fails.",
+                    "Failed",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+
+        private void indiaChallenge() {
+            String answer = JOptionPane.showInputDialog(ConquestMapPuzzle.this,
+                "INDIA - 326 BC\n\n" +
+                "At the Battle of Hydaspes, Alexander faced King Porus.\n" +
+                "Porus used a terrifying weapon Alexander had never seen before.\n\n" +
+                "What massive animals did Porus deploy in battle?",
+                "Conquer India",
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (answer != null && answer.toLowerCase().contains("")) {
+                conquered.add("India");
+                status.setText("India conquered! But your men grow weary...");
+                repaint();
+                check();
+            } else {
+                JOptionPane.showMessageDialog(ConquestMapPuzzle.this,
+                    "Wrong! Your army is trampled by the unknown beasts.",
+                    "Failed",
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+
+        private void slChallenge() {
+            String options [] = {"They mutinied and refused", "They sailed immediately", "They asked for more gold"};
+            int choice = JOptionPane.showOptionDialog(ConquestMapPuzzle.this,
+                "SRI LANKA (Taprobane) - 325 BC\n\n" +
+                "Alexander wanted to conquer the island of Taprobane (Sri Lanka).\n" +
+                "But his exhausted army had reached their limit.\n\n" +
+                "What did Alexander's soldiers do when asked to march further east?",
+                "The Edge of the World",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+            );
+
+            if (choice == 0) {
+                conquered.add("Sri Lanka");
+                status.setText("Your empire is complete! The men have spoken.");
+                repaint();
+                check();
+            } else {
+                JOptionPane.showMessageDialog(ConquestMapPuzzle.this,
+                    "Incorrect. Understanding your limits is the mark of a true leader.",
+                    "Try Again",
+                    JOptionPane.WARNING_MESSAGE
+                );
+            }
+        }
+
+        private void check() {
+            if (conquered.size() >= 4) {
+                Timer timer = new Timer(1500, e -> {
+                    JOptionPane.showMessageDialog(ConquestMapPuzzle.this,
+                        "Alexander's empire stretched from Egypt to India!\n\n" +
+                        "He brought Greek knowledge to the East,\n" +
+                        "and Eastern wisdom back to the West.\n\n" +
+                        "His greatest legacy: the Library of Alexandria,\n" +
+                        "where all human knowledge was gathered...",
+                        "Stage 1 Complete!",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                    dispose();
+                    //parent.startStage2();
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
         }
     }
