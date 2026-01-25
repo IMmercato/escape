@@ -2646,7 +2646,7 @@ class SphinxRiddle extends JFrame {
 
 class AlexanderChapter {
     public static void main(String[] args) {
-        new LibraryOfAlexandria(null);
+        new SriLankanWidsom(null);
     }
 
     public AlexanderChapter() {
@@ -3073,5 +3073,123 @@ class SriLankanWidsom extends JFrame {
 
     public SriLankanWidsom(AlexanderChapter parent) {
         this.parent = parent;
+
+        setTitle("Stage 3: The Island of Taprobane");
+        setSize(800, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("🏝️ Ancient Taprobane - The Pearl of the Indian Ocean", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 20));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        content.setBackground(new Color(240, 255, 240));
+
+        JTextArea story = new JTextArea(
+            "The Island of Taprobane (Ancient Sri Lanka), 300 BC\n\n" +
+            "Though Alexander never reached this island, his emissaries did.\n" +
+            "They found a civilization of great learning - Buddhist monks who\n" +
+            "preserved ancient wisdom in the Pali Canon.\n\n" +
+            "A monk greets you at the ancient temple of Anuradhapura:\n\n" +
+            "\"Welcome, seeker. You have traveled from Rome through many lands.\n" +
+            "Here on our island, we have preserved the teachings of the Buddha,\n" +
+            "brought from India 200 years ago by Mahinda, son of Emperor Ashoka.\"\n\n" +
+            "\"Our Tripitaka - the Three Baskets of wisdom - contain truths\n" +
+            "about suffering, impermanence, and enlightenment.\n" +
+            "This knowledge spread from India to Sri Lanka, then to all of Asia.\""
+        );
+        story.setEditable(false);
+        story.setLineWrap(true);
+        story.setWrapStyleWord(true);
+        story.setFont(new Font("Serif", Font.PLAIN, 13));
+        story.setBackground(new Color(240, 255, 240));
+
+        JLabel challenge = new JLabel("<html><center><br><b>The Four Noble Truths Puzzle</b><br>" + "Arrange these concepts in the correct order:</center></html>");
+        challenge.setFont(new Font("Serif", Font.BOLD, 14));
+        challenge.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        String truths [] = {
+            "1. Life contains suffering (Dukkha)",
+            "2. Suffering has a cause (Samudaya)",
+            "3. Suffering can end (Nirodha)",
+            "4. There is a path to end suffering (Magga)"
+        };
+
+        JPanel order = new JPanel(new GridLayout(4, 1, 10, 10));
+        order.setBackground(new Color(240, 255, 240));
+
+        List<JComboBox<Integer>> combos = new ArrayList<>();
+
+        for (String truth : truths) {
+            JPanel row = new JPanel(new BorderLayout(10, 0));
+            row.setBackground(new Color(240, 255, 240));
+
+            JLabel label = new JLabel(truth);
+            label.setFont(new Font("Serif", Font.PLAIN, 13));
+
+            JComboBox<Integer> orderBox = new JComboBox<>(new Integer[]{1, 2, 3, 4});
+            orderBox.setFont(new Font("Serif", Font.PLAIN, 14));
+            combos.add(orderBox);
+
+            row.add(label, BorderLayout.CENTER);
+            row.add(orderBox, BorderLayout.EAST);
+            order.add(row);
+        }
+
+        for (int i = 0; i < combos.size(); i++) {
+            combos.get(i).setSelectedIndex(i);
+        }
+
+        JButton check = new JButton("Verify Understanding");
+        check.setFont(new Font("Serif", Font.BOLD, 14));
+        check.setAlignmentX(Component.CENTER_ALIGNMENT);
+        check.addActionListener(e -> {
+            boolean correct = true;
+            for (int i = 0; i < combos.size(); i++) {
+                if (!combos.get(i).getSelectedItem().equals(i + 1)) {
+                    correct = false;
+                    break;
+                }
+            }
+
+            if (correct) {
+                JOptionPane.showMessageDialog(this,
+                    "Excellent! You understand the Four Noble Truths.\n\n" +
+                    "The monk smiles: \"This wisdom traveled from India to our island,\n" +
+                    "and from here it will spread across Asia.\n\n" +
+                    "Just as Alexander connected West and East through conquest,\n" +
+                    "Buddhism connects them through compassion and wisdom.\"\n\n" +
+                    "Now face one final test...",
+                    "Wisdom Achieved!",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                dispose();
+                //parent.startStage4();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                    "Not quite. Study the natural progression:\n" +
+                    "First recognize suffering, then its cause,\n" +
+                    "then that it can end, then the path to end it.",
+                    "Try Again",
+                    JOptionPane.WARNING_MESSAGE
+                );
+            }
+        });
+
+        content.add(story);
+        content.add(Box.createVerticalStrut(15));
+        content.add(challenge);
+        content.add(Box.createVerticalStrut(10));
+        content.add(order);
+        content.add(Box.createVerticalStrut(20));
+        content.add(check);
+
+        add(header, BorderLayout.NORTH);
+        add(new JScrollPane(content), BorderLayout.CENTER);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
 }
