@@ -2646,11 +2646,19 @@ class SphinxRiddle extends JFrame {
 
 class AlexanderChapter {
     public static void main(String[] args) {
-        new ConquestMapPuzzle(null);
+        new LibraryOfAlexandria(null);
     }
 
     public AlexanderChapter() {
         new ConquestMapPuzzle(this);
+    }
+
+    public void startStage2() {
+        new LibraryOfAlexandria(this);
+    }
+
+    public void startStage3() {
+        new SriLankanWidsom(this);
     }
 }
 
@@ -2922,5 +2930,148 @@ class ConquestMapPuzzle extends JFrame {
                 timer.start();
             }
         }
+    }
+}
+
+class LibraryOfAlexandria extends JFrame{
+    private AlexanderChapter parent;
+    private Set<String> foundScrolls = new HashSet<>();
+
+    public LibraryOfAlexandria(AlexanderChapter parent) {
+        this.parent = parent;
+
+        setTitle("Stage 2: The Library of Alexandria");
+        setSize(900, 700);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("📚 The Great Library - Repository of Ancient Knowledge", SwingConstants.CENTER);
+        header.setFont(escape.H_FONT);
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>Find the 4 sacred scrolls hidden in the library:<br>" + "Greek, Egyptian, Persian, and Indian wisdom</center></html>");
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        Library library = new Library();
+
+        add(header, BorderLayout.NORTH);
+        add(instruction, BorderLayout.SOUTH);
+        add(library, BorderLayout.CENTER);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class Library extends JPanel {
+        private Map<String, Rectangle> scrollL = new HashMap<>();
+        private Map<String, String> scrollWisdom = new HashMap<>();
+        public Library() {
+            setBackground(new Color(139, 69, 19));
+            
+            scrollL.put("Greek", new Rectangle(100, 150, 60, 40));
+            scrollL.put("Egyptian", new Rectangle(300, 200, 60, 40));
+            scrollL.put("Persian", new Rectangle(500, 180, 60, 40));
+            scrollL.put("Indian", new Rectangle(700, 160, 60, 40));
+            
+            scrollWisdom.put("Greek", "\"Know thyself\" - Socrates");
+            scrollWisdom.put("Egyptian", "\"As above, so below\" - Hermes Trismegistus");
+            scrollWisdom.put("Persian", "\"Good thoughts, good words, good deeds\" - Zoroaster");
+            scrollWisdom.put("Indian", "\"The self is one\" - Upanishads");
+            
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    handleClick(e.getPoint());
+                }
+            });
+        }
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            gr.setColor(new Color(101, 67, 33));
+            for (int i = 0; i < 5; i++) {
+                gr.fillRect(50 + i * 180, 100, 120, 300);
+            }
+            
+            for (Map.Entry<String, Rectangle> entry : scrollL.entrySet()) {
+                Rectangle r = entry.getValue();
+                String name = entry.getKey();
+                
+                if (foundScrolls.contains(name)) {
+                    gr.setColor(new Color(255, 215, 0));
+                } else {
+                    gr.setColor(new Color(245, 222, 179));
+                }
+
+                gr.fillRoundRect(r.x, r.y, r.width, r.height, 10, 10);
+                gr.setColor(Color.BLACK);
+                gr.drawRoundRect(r.x, r.y, r.width, r.height, 10, 10);
+
+                if (!foundScrolls.contains(name)) {
+                    gr.setFont(new Font("Serif", Font.BOLD, 10));
+                    gr.drawString("?", r.x + 25, r.y + 25);
+                }
+            }
+
+            gr.setColor(new Color(245, 222, 179));
+            gr.fillRect(50, 450, 800, 200);
+            gr.setColor(Color.BLACK);
+            gr.drawRect(50, 450, 800, 200);
+
+            gr.setFont(new Font("Serif", Font.ITALIC, 14));
+            int y = 480;
+            for (String scroll : foundScrolls) {
+                gr.drawString(scrollWisdom.get(scroll), 70, y);
+                y += 30;
+            }
+
+            if (foundScrolls.size() < 4) {
+                gr.setFont(new Font("Serif", Font.PLAIN, 12));
+                gr.drawString("Click on scrolls to reveal ancient wisdom (" + foundScrolls.size() + "/4 found)", 70, y + 20);
+            }
+        }
+        
+        private void handleClick(Point p) {
+            for (Map.Entry<String, Rectangle> entry : scrollL.entrySet()) {
+                if (entry.getValue().contains(p) && !foundScrolls.contains(entry.getKey())) {
+                    foundScrolls.add(entry.getKey());
+                    repaint();
+
+                    if (foundScrolls.size() >= 4) {
+                        Timer timer = new Timer(1500, e -> {
+                            JOptionPane.showMessageDialog(LibraryOfAlexandria.this,
+                                "You have gathered wisdom from across the known world!\n\n" +
+                                "The Library of Alexandria united knowledge from\n" +
+                                "Greece, Egypt, Persia, and India.\n\n" +
+                                "But there is one more source of ancient wisdom...\n" +
+                                "The island of Taprobane - Sri Lanka,\n" +
+                                "where Buddhist teachings preserve eternal truths.",
+                                "Knowledge United!",
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                            dispose();
+                            //parent.startStage3();
+                        });
+                        timer.setRepeats(false);
+                        timer.start();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+class SriLankanWidsom extends JFrame {
+    private AlexanderChapter parent;
+
+    public SriLankanWidsom(AlexanderChapter parent) {
+        this.parent = parent;
     }
 }
