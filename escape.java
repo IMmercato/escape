@@ -2646,7 +2646,7 @@ class SphinxRiddle extends JFrame {
 
 class AlexanderChapter {
     public static void main(String[] args) {
-        new SriLankanWidsom(null);
+        new GordianKnot(null);
     }
 
     public AlexanderChapter() {
@@ -2659,6 +2659,10 @@ class AlexanderChapter {
 
     public void startStage3() {
         new SriLankanWidsom(this);
+    }
+
+    public void startStage4() {
+        new GordianKnot(this);
     }
 }
 
@@ -3191,5 +3195,134 @@ class SriLankanWidsom extends JFrame {
 
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+}
+
+class GordianKnot extends JFrame {
+    private AlexanderChapter parent;
+    private boolean knotCut = false;
+
+    public GordianKnot(AlexanderChapter parent) {
+        this.parent = parent;
+
+        setTitle("STage 4: The Gordian Knot");
+        setSize(700, 650);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        JLabel header = new JLabel("The Legendary Gordian Knot", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 22));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        content.setBackground(new Color(245, 245, 220));
+
+        JTextArea story = new JTextArea(
+            "Gordium, Phrygia - 333 BC\n\n" +
+            "Before you stands the famous Gordian Knot, an impossibly\n" +
+            "complex tangle of rope that has defeated countless scholars.\n\n" +
+            "Legend says: \"Whoever unties this knot will rule all of Asia.\"\n\n" +
+            "Many have tried to untie it through patience and cleverness.\n" +
+            "All have failed.\n\n" +
+            "Alexander the Great faced this same puzzle.\n" +
+            "How did he solve it?\n\n" +
+            "He didn't untie it...\n" +
+            "He drew his sword and CUT IT IN HALF.\n\n" +
+            "Sometimes the solution is not to follow the rules,\n" +
+            "but to think differently."
+        );
+        story.setEditable(false);
+        story.setLineWrap(true);
+        story.setWrapStyleWord(true);
+        story.setFont(new Font("Serif", Font.PLAIN, 14));
+        story.setBackground(new Color(245, 245, 220));
+
+        Knot knot = new Knot();
+        knot.setPreferredSize(new Dimension(600, 200));
+        knot.setMaximumSize(new Dimension(600, 200));
+        knot.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel instruction = new JLabel("<html><center><br>What will you do?<br>" + "Click and drag to try untying... or find another way.</center></html>");
+        instruction.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton cut = new JButton("⚔️ Cut the Knot");
+        cut.setFont(new Font("Serif", Font.BOLD, 16));
+        cut.setBackground(new Color(139, 0, 0));
+        cut.setForeground(Color.WHITE);
+        cut.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cut.addActionListener(e -> cutKnot());
+
+        content.add(story);
+        content.add(Box.createVerticalStrut(15));
+        content.add(knot);
+        content.add(Box.createVerticalStrut(10));
+        content.add(instruction);
+        content.add(Box.createVerticalStrut(15));
+        content.add(cut);
+
+        add(header, BorderLayout.NORTH);
+        add(content, BorderLayout.CENTER);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class Knot extends JPanel {
+        public Knot() {
+            setBackground(new Color(245, 245, 220));
+            setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            if (knotCut) {
+                gr.setColor(new Color(139, 69, 19));
+                gr.setStroke(new BasicStroke(8));
+                gr.drawLine(50, 100, 250, 100);
+                gr.drawLine(350, 100, 550, 100);
+
+                gr.setColor(Color.RED);
+                gr.setStroke(new BasicStroke(4));
+                gr.drawLine(280, 50, 320, 150);
+            } else {
+                gr.setColor(new Color(139, 69, 19));
+                gr.setStroke(new BasicStroke(8));
+
+                gr.drawOval(150, 50, 100, 100);
+                gr.drawOval(200, 50, 100, 100);
+                gr.drawOval(250, 50, 100, 100);
+                gr.drawOval(175, 80, 150, 60);
+                gr.drawLine(150, 100, 100, 120);
+                gr.drawLine(350, 100, 400, 120);
+            }
+        }
+    }
+
+    private void cutKnot() {
+        knotCut = true;
+        repaint();
+
+        Timer timer = new Timer(1000, e -> {
+            JOptionPane.showMessageDialog(this,
+                "SOLVED!\n\n" +
+                "Like Alexander, you chose the bold solution.\n\n" +
+                "Sometimes the greatest wisdom is knowing when to\n" +
+                "break from tradition and create a new path.\n\n" +
+                "Alexander united East and West through conquest and culture.\n" +
+                "His legacy: the spread of knowledge across continents.\n\n" +
+                "From his empire, the Silk Road was born...",
+                "Chapter VII Complete!",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            dispose();
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 }
