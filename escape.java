@@ -3308,17 +3308,33 @@ class SriLankanWidsom extends JFrame {
 class GordianKnot extends JFrame {
     private AlexanderChapter parent;
     private boolean knotCut = false;
+    private Point start = null;
+    private Point end = null;
+    private Timer shake;
+    private int shakeO = 0;
 
     public GordianKnot(AlexanderChapter parent) {
         this.parent = parent;
 
         setTitle("STage 4: The Gordian Knot");
-        setSize(700, 650);
+        setSize(700, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        JLabel header = new JLabel("The Legendary Gordian Knot", SwingConstants.CENTER);
-        header.setFont(new Font("Serif", Font.BOLD, 22));
+        JPanel header = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D gr = (Graphics2D) g;
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(128, 0, 0), getWidth(), 0 , new Color(184, 134, 11));
+                gr.setPaint(gradient);
+                gr.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        JLabel headerL = new JLabel("The Legendary Gordian Knot", SwingConstants.CENTER);
+        headerL.setFont(new Font("Serif", Font.BOLD, 22));
+        headerL.setForeground(Color.WHITE);
+        header.add(headerL);
 
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -3346,9 +3362,10 @@ class GordianKnot extends JFrame {
         story.setBackground(new Color(245, 245, 220));
 
         Knot knot = new Knot();
-        knot.setPreferredSize(new Dimension(600, 200));
-        knot.setMaximumSize(new Dimension(600, 200));
+        knot.setPreferredSize(new Dimension(600, 350));
+        knot.setMaximumSize(new Dimension(600, 350));
         knot.setAlignmentX(Component.CENTER_ALIGNMENT);
+        knot.setBorder(BorderFactory.createLineBorder(new Color(139, 69, 19), 3));
 
         JLabel instruction = new JLabel("<html><center><br>What will you do?<br>" + "Click and drag to try untying... or find another way.</center></html>");
         instruction.setFont(new Font("Serif", Font.ITALIC, 13));
@@ -3359,7 +3376,7 @@ class GordianKnot extends JFrame {
         cut.setBackground(new Color(139, 0, 0));
         cut.setForeground(Color.WHITE);
         cut.setAlignmentX(Component.CENTER_ALIGNMENT);
-        cut.addActionListener(e -> cutKnot());
+        cut.addActionListener(e -> knot.cut());
 
         content.add(story);
         content.add(Box.createVerticalStrut(15));
@@ -3377,9 +3394,101 @@ class GordianKnot extends JFrame {
     }
 
     class Knot extends JPanel {
+        private boolean cutting = false;
+        private List<Point> drag = new ArrayList<>();
+        private int attempts = 0;
+
         public Knot() {
-            setBackground(new Color(245, 245, 220));
-            setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+            setBackground(new Color(240, 230, 210));
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (cutting) {
+                        start = e.getPoint();
+                        drag.clear();
+                    } else {
+                        attempts++;
+                        shakeKnot();
+                        if (attempts >= 3) {
+                            JOptionPane.showMessageDialog(Knot.this,
+                                "The knot is impossible to untie!\n\n" +
+                                "Perhaps a different approach is needed...\n" +
+                                "What would a conqueror do?",
+                                "Hmm...",
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                        }
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (cutting && start != null) {
+                        end = e.getPoint();
+                        if (crossesKnot(start, end)) {
+                            cutKnot();
+                        } else {
+                            JOptionPane.showMessageDialog(Knot.this,
+                                "Your sword missed the knot!\n" +
+                                "Try cutting through the center.",
+                                "Missed!",
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                            start = null;
+                            end = null;
+                            drag.clear();
+                            repaint();
+                        }
+                    }
+                }
+            });
+
+            addMouseMotionListener(new MouseMotionAdapter() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if (cutting && start != null) {
+                        drag.add(e.getPoint());
+                        repaint();
+                    }
+                }
+            });
+        }
+
+        public void cut() {
+            cutting = true;
+            JOptionPane.showMessageDialog(this,
+                "Sword Drawn!\n\n" +
+                "Click and drag across the knot to cut it!\n" +
+                "Be bold like Alexander!",
+                "Ready to Strike",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+
+        private boolean crossesKnot(Point start, Point end) {
+            int centerX = getWidth() / 2;
+            int centerY = getHeight() / 2;
+            Rectangle knot = new Rectangle(centerX - 200, centerY - 80, 400, 160);
+            return knot.intersectsLine(start.x, start.y, end.x, end.y);
+        }
+
+        private void shakeKnot() {
+            shake = new Timer(50, new ActionListener() {
+                int count = 0;
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    shakeO = (count % 2 == 0) ? 5 : -5;
+                    repaint();
+                    count++;
+                    if (count > 10) {
+                        shakeO = 0;
+                        repaint();
+                        ((Timer)e.getSource()).stop();
+                    }
+                }
+            });
+            shake.start();
         }
 
         @Override
@@ -3388,25 +3497,63 @@ class GordianKnot extends JFrame {
             Graphics2D gr = (Graphics2D) g;
             gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+            int centerX = getWidth() / 2 + shakeO;
+            int centerY = getHeight() / 2;
+
             if (knotCut) {
                 gr.setColor(new Color(139, 69, 19));
-                gr.setStroke(new BasicStroke(8));
-                gr.drawLine(50, 100, 250, 100);
-                gr.drawLine(350, 100, 550, 100);
+                gr.setStroke(new BasicStroke(12));
+                gr.drawOval(centerX - 200, centerY - 60, 100, 100);
+                gr.drawOval(centerX - 150, centerY - 60, 100, 100);
+                gr.drawOval(centerX - 175, centerY - 30, 150, 60);
+                gr.drawLine(centerX - 200, centerY, centerX - 250, centerY + 60);
+
+                gr.drawOval(centerX + 100, centerY - 60, 100, 100);
+                gr.drawOval(centerX + 50, centerY - 60, 100, 100);
+                gr.drawOval(centerX + 25, centerY - 30, 150, 60);
+                gr.drawLine(centerX + 200, centerY, centerX + 250, centerY + 60);
+
+                gr.setColor(new Color(255, 215, 0));
+                gr.setStroke(new BasicStroke(6));
+                gr.drawLine(centerX - 10, centerY - 120, centerX + 10, centerY + 120);
 
                 gr.setColor(Color.RED);
-                gr.setStroke(new BasicStroke(4));
-                gr.drawLine(280, 50, 320, 150);
+                gr.setStroke(new BasicStroke(3));
+                gr.drawLine(centerX - 5, centerY - 120, centerX + 5, centerY + 120);
+
+                Random rand = new Random(42);
+                gr.setColor(Color.YELLOW);
+                for (int i = 0; i < 20; i++) {
+                    int x = centerX + rand.nextInt(60) - 30;
+                    int y = centerY + rand.nextInt(240) - 120;
+                    gr.fillOval(x, y, 5, 5);
+                }
             } else {
                 gr.setColor(new Color(139, 69, 19));
-                gr.setStroke(new BasicStroke(8));
+                gr.setStroke(new BasicStroke(12));
+                
+                gr.drawOval(centerX - 150, centerY - 60, 100, 100);
+                gr.drawOval(centerX - 100, centerY - 60, 100, 100);
+                gr.drawOval(centerX - 50, centerY - 60, 100, 100);
+                gr.drawOval(centerX, centerY - 60, 100, 100);
+                gr.drawOval(centerX + 50, centerY - 60, 100, 100);
+                
+                gr.drawOval(centerX - 125, centerY - 30, 150, 60);
+                gr.drawOval(centerX - 25, centerY - 30, 150, 60);
+                gr.drawOval(centerX - 75, centerY - 45, 150, 90);
+                
+                gr.drawLine(centerX - 150, centerY, centerX - 220, centerY + 60);
+                gr.drawLine(centerX + 150, centerY, centerX + 220, centerY + 60);
 
-                gr.drawOval(150, 50, 100, 100);
-                gr.drawOval(200, 50, 100, 100);
-                gr.drawOval(250, 50, 100, 100);
-                gr.drawOval(175, 80, 150, 60);
-                gr.drawLine(150, 100, 100, 120);
-                gr.drawLine(350, 100, 400, 120);
+                if (cutting && !drag.isEmpty()) {
+                    gr.setColor(new Color(192, 192, 192, 180));
+                    gr.setStroke(new BasicStroke(8));
+                    for (int i = 1; i < drag.size(); i++) {
+                        Point p1 = drag.get(i - 1);
+                        Point p2 = drag.get(i);
+                        gr.drawLine(p1.x, p1.y, p2.x, p2.y);
+                    }
+                }
             }
         }
     }
