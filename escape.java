@@ -3580,3 +3580,184 @@ class GordianKnot extends JFrame {
         timer.start();
     }
 }
+
+class ChinaChapter {
+    // DEBUG
+    public static void main(String[] args) {
+        new SilkRoadPuzzle(null);
+    }
+
+    public ChinaChapter() {
+        new SilkRoadPuzzle(this);
+    }
+}
+
+class SilkRoadPuzzle extends JFrame {
+    private ChinaChapter parent;
+    private Point caravan;
+    private List<Point> trade;
+    private int reached = 0;
+
+    public SilkRoadPuzzle(ChinaChapter parent) {
+        this.parent = parent;
+
+        setTitle("Stage 1: The Silk Road");
+        setSize(1000, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        caravan = new Point(100, 350);
+        trade = Arrays.asList(
+            new Point(250, 320),    // Persia
+            new Point(450, 300),    // Central Asia
+            new Point(650, 330),    // India
+            new Point(850, 350)     // China
+        );
+
+        JLabel header = new JLabel("Navigate the Silk Road from West to East", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 20));
+
+        JPanel instruction = new JPanel();
+        instruction.setBackground(new Color(255, 248, 220));
+        JLabel instructions = new JLabel("<html><center>Use arrow keys to guide your caravan along the ancient trade route.<br>" + "Stop at each trading post (⭐) to exchange goods and knowledge!</center></html>");
+        instructions.setFont(new Font("Serif", Font.ITALIC, 13));
+        instruction.add(instructions);
+
+        SilkRoad road = new SilkRoad();
+        road.setFocusable(true);
+        road.requestFocusInWindow();
+
+        add(header, BorderLayout.NORTH);
+        add(instruction, BorderLayout.SOUTH);
+        add(road, BorderLayout.CENTER);
+        
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    class SilkRoad extends JPanel {
+        private Set<Integer> visited = new HashSet<>();
+
+        public SilkRoad() {
+            setBackground(new Color(245, 222, 179));
+
+            addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    int speed = 10;
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_UP:
+                            caravan.y = Math.max(0, caravan.y - speed);
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            caravan.y = Math.min(getHeight() - 30, caravan.y + speed);
+                            break;
+                        case KeyEvent.VK_LEFT:
+                            caravan.x = Math.max(0, caravan.x - speed);
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            caravan.x = Math.min(getWidth() - 30, caravan.x + speed);
+                            break;
+                    }
+                    checkTrades();
+                    repaint();
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D gr = (Graphics2D) g;
+            gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            gr.setColor(new Color(139, 137, 137));
+            int xP [] = {0, 200, 400, 600, 800, 1000};
+            int yP [] = {400, 200, 380, 250, 420, 300};
+            for (int i = 0; i < xP.length - 1; i++) {
+                gr.fillPolygon(new int[]{xP[i], xP[i + 1], xP[i + 1]}, new int[]{600, 600, yP[i]}, 3);
+            }
+
+            gr.setColor(new Color(205, 133, 63));
+            gr.setStroke(new BasicStroke(15, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            Point start = new Point(50, 350);
+            for (Point p : trade) {
+                gr.drawLine(start.x, start.y, p.x, p.y);
+                start = p;
+            }
+
+            gr.setFont(new Font("Serif", Font.BOLD, 14));
+            String names [] = {"Persia", "Samarkand", "India", "China"};
+            for (int i = 0; i < trade.size(); i++) {
+                Point p = trade.get(i);
+
+                if (visited.contains(i)) {
+                    gr.setColor(new Color(0, 200, 0));
+                } else {
+                    gr.setColor(new Color(255, 215, 0));
+                }
+
+                gr.fillOval(p.x - 15, p.y, 30, 30);
+                gr.setColor(Color.BLACK);
+                gr.drawString(names[i], p.x - 20, p.y - 20);
+
+                if (!visited.contains(i)) {
+                    gr.setColor(Color.RED);
+                    gr.setFont(new Font("Serif", Font.BOLD, 20));
+                    gr.drawString("⭐", p.x - 10, p.y + 5);
+                    gr.setFont(new Font("Serif", Font.BOLD, 14));
+                }
+            }
+
+            gr.setColor(new Color(139, 69, 19));
+            gr.fillRect(caravan.x, caravan.y, 30, 20);
+            gr.setColor(new Color(101, 67, 33));
+            gr.fillOval(caravan.x + 5, caravan.y - 15, 20, 20);
+
+            gr.setColor(Color.BLACK);
+            gr.setFont(new Font("Serif", Font.BOLD, 16));
+            gr.drawString("Trading Posts: " + visited.size() + "/4", 20, 20);
+        }
+
+        private void checkTrades() {
+            for (int i = 0; i < trade.size(); i++) {
+                Point p = trade.get(i);
+                if (caravan.distance(p) < 40 && !visited.contains(i)) {
+                    visited.add(i);
+
+                    String message [] = {
+                        "Persia: Traded spices and glassware!",
+                        "Samarkand: Exchanged silk for precious gems!",
+                        "India: Shared mathematical knowledge and cotton!",
+                        "China: Arrived at Xi'an - End of the Silk Road!"
+                    };
+
+                    JOptionPane.showMessageDialog(SilkRoadPuzzle.this,
+                        message[i],
+                        "Trade Complete!",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    if (visited.size() >= 4) {
+                        Timer timer = new Timer(500, e -> {
+                            JOptionPane.showMessageDialog(SilkRoadPuzzle.this,
+                                "You've completed the Silk Road journey!\n\n" +
+                                "For over 1,500 years, this route connected\n" +
+                                "civilizations from Rome to China.\n\n" +
+                                "Not just goods, but ideas, inventions, and\n" +
+                                "religions traveled this path.\n\n" +
+                                "Now discover China's great innovations...",
+                                "Stage 1 Complete!",
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                            dispose();
+                            //parent.startStage2();
+                        });
+                        timer.setRepeats(false);
+                        timer.start();
+                    }
+                }
+            }
+        }
+    }
+}
