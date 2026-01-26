@@ -16,6 +16,7 @@ import javax.swing.border.TitledBorder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -3584,11 +3585,15 @@ class GordianKnot extends JFrame {
 class ChinaChapter {
     // DEBUG
     public static void main(String[] args) {
-        new SilkRoadPuzzle(null);
+        new FourInventions(null);
     }
 
     public ChinaChapter() {
         new SilkRoadPuzzle(this);
+    }
+
+    public void startStage2() {
+        new FourInventions(this);
     }
 }
 
@@ -3759,5 +3764,128 @@ class SilkRoadPuzzle extends JFrame {
                 }
             }
         }
+    }
+}
+
+class FourInventions extends JFrame {
+    private ChinaChapter parent;
+    private Map<String, String> inventions = new LinkedHashMap<>();
+    private Map<String, Boolean> matched = new HashMap<>();
+
+    public FourInventions(ChinaChapter parent) {
+        this.parent = parent;
+
+        setTitle("Stage 2: The Four Great Inventions");
+        setSize(800, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        inventions.put("Paper", "105 AD - Cai Lun invented paper from tree bark and hemp");
+        inventions.put("Printing", "868 AD - Woodblock printing for books and texts");
+        inventions.put("Gunpowder", "9th century - Used for fireworks and weapons");
+        inventions.put("Compass", "11th century - Magnetic navigation tool");
+
+        JLabel header = new JLabel("China's Four Great Inventions", SwingConstants.CENTER);
+        header.setFont(new Font("Serif", Font.BOLD, 22));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        content.setBackground(new Color(255, 250, 240));
+
+        JTextArea intro = new JTextArea(
+            "Ancient China gave the world four inventions that changed history.\n" +
+            "These innovations spread along the Silk Road to transform civilizations.\n\n" +
+            "Match each invention to its purpose:"
+        );
+        intro.setEditable(false);
+        intro.setLineWrap(true);
+        intro.setWrapStyleWord(true);
+        intro.setFont(new Font("Serif", Font.ITALIC, 14));
+        intro.setBackground(new Color(255, 250, 240));
+        intro.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel match = new JPanel(new GridLayout(4, 2, 15, 15));
+        match.setBackground(new Color(255, 250, 240));
+
+        String purposes [] = {
+            "For writing and recording knowledge",
+            "For spreading information widely",
+            "For warfare and celebrations",
+            "For navigation across seas"
+        };
+
+        List<String> shuffled = new ArrayList<>(Arrays.asList(purposes));
+        Collections.shuffle(shuffled);
+
+        Map<String, Integer> correct = new HashMap<>();
+        correct.put("Paper", 0);
+        correct.put("Printing", 1);
+        correct.put("Gunpowder", 2);
+        correct.put("Compass", 3);
+
+        int i = 0;
+        for (String invention : inventions.keySet()) {
+            JLabel inventionL = new JLabel("📜 " + invention);
+            inventionL.setFont(new Font("Serif", Font.BOLD, 16));
+            inventionL.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+            inventionL.setOpaque(true);
+            inventionL.setBackground(Color.WHITE);
+            inventionL.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JComboBox<String> purposeBox = new JComboBox<>(purposes);
+            purposeBox.setFont(new Font("Serif", Font.PLAIN, 13));
+
+            final String inv = invention;
+            purposeBox.addActionListener(e -> {
+                String selected = (String) purposeBox.getSelectedItem();
+                int selectedI = Arrays.asList(purposes).indexOf(selected);
+
+                if (selectedI == correct.get(inv)) {
+                    inventionL.setBackground(new Color(144, 238, 144));
+                    matched.put(inv, false);
+                } else {
+                    inventionL.setBackground(Color.WHITE);
+                    matched.put(inv, false);
+                }
+
+                if (matched.size() >= 4 && matched.values().stream().allMatch(v -> v)) {
+                    Timer timer = new Timer(800, evt -> showSuccess());
+                    timer.setRepeats(false);
+                    timer.start();
+                }
+            });
+
+            match.add(inventionL);
+            match.add(purposeBox);
+            i++;
+        }
+
+        content.add(intro);
+        content.add(Box.createVerticalStrut(20));
+        content.add(match);
+
+        add(header, BorderLayout.NORTH);
+        add(new JScrollPane(content), BorderLayout.CENTER);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private void showSuccess() {
+        JOptionPane.showMessageDialog(this,
+            "Perfect! You understand China's Four Great Inventions!\n\n" +
+            "• Paper - enabled knowledge preservation\n" +
+            "• Printing - spread ideas across the world\n" +
+            "• Gunpowder - changed warfare forever\n" +
+            "• Compass - made ocean navigation possible\n\n" +
+            "These inventions reached Europe via the Silk Road,\n" +
+            "enabling the Renaissance and Age of Exploration!\n\n" +
+            "Now defend the Great Wall...",
+            "Stage 2 Complete!",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        dispose();
+        //parent.startStage3();
     }
 }
