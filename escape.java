@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -2541,6 +2543,10 @@ class SphinxRiddle extends JFrame {
     private EgyptianChapter parent;
     private boolean completed = false;
     private final Object lock = new Object();
+    private JTextArea riddle;
+    private Timer glowTimer;
+    private float glow = 0.3f;
+    private boolean glowI = true;
 
     public SphinxRiddle(EgyptianChapter parent) {
         this.parent = parent;
@@ -2549,12 +2555,24 @@ class SphinxRiddle extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(15, 15));
 
-        JPanel header = new JPanel();
-        header.setBackground(new Color(139, 69, 19)); // D_BROWN
+        JPanel header = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D gr = (Graphics2D) g;
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(139, 69 ,19), getWidth(), 0, new Color(184, 134, 11));
+                gr.setPaint(gradient);
+                gr.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
         JLabel headerL = new JLabel("The Great Sphinx of Giza", SwingConstants.CENTER);
         headerL.setFont(escape.T_FONT);
         headerL.setForeground(Color.WHITE);
         header.add(headerL);
+
+        JPanel center = new JPanel(new BorderLayout(10, 10));
+        center.setBackground(new Color(245, 222, 179));
+        center.setBorder(BorderFactory.createEmptyBorder(10, 30, 20, 30));
 
         JTextArea story = new JTextArea(
             "Before you stands the Great Sphinx, guardian of the pyramids.\n\n" +
@@ -2563,64 +2581,153 @@ class SphinxRiddle extends JFrame {
             "Caesar's Rome through Dante's Hell, from Renaissance Florence\n" +
             "to the New World of the Maya, and now to ancient Egypt.\"\n\n" +
             "\"You have seen that knowledge connects all civilizations.\n" +
-            "Now answer my ancient riddle:\"\n\n" +
-            "THE RIDDLE OF THE SPHINX:\n\n" +
-            "\"What walks on four legs in the morning,\n" +
-            "two legs at noon,\n" +
-            "and three legs in the evening?\""
+            "Now answer my ancient riddle...\""
         );
         story.setEditable(false);
         story.setLineWrap(true);
         story.setWrapStyleWord(true);
         story.setFont(new Font("Serif", Font.PLAIN, 14));
         story.setBackground(new Color(245, 222, 179));
-        story.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        story.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        riddle = new JTextArea();
+        riddle.setEditable(false);
+        riddle.setLineWrap(true);
+        riddle.setWrapStyleWord(true);
+        riddle.setFont(new Font("Serif", Font.BOLD | Font.ITALIC, 16));
+        riddle.setBackground(new Color(255, 248, 220));
+        riddle.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(139, 69, 19), 3),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+        riddle.setForeground(new Color(139, 0, 0));
+
+        JPanel input = new JPanel();
+        input.setLayout(new BoxLayout(input, BoxLayout.Y_AXIS));
+        input.setBackground(new Color(245, 222, 179));
+        input.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+
+        JLabel prompt = new JLabel("Your Answer:", SwingConstants.CENTER);
+        prompt.setFont(new Font("Serif", Font.BOLD, 16));
+        prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JTextField answer = new JTextField(25);
-        answer.setFont(new Font("Serif", Font.PLAIN, 16));
+        answer.setFont(new Font("Serif", Font.PLAIN, 18));
         answer.setHorizontalAlignment(JTextField.CENTER);
+        answer.setMaximumSize(new Dimension(400, 40));
+        answer.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JButton submit = new JButton("Answer the Sphinx");
         submit.setFont(new Font("Serif", Font.BOLD, 16));
         submit.setBackground(new Color(139, 69, 19));
         submit.setForeground(Color.WHITE);
         submit.setFocusPainted(false);
+        submit.setAlignmentX(Component.CENTER_ALIGNMENT);
         submit.addActionListener(e -> checkAnswer(answer));
 
-        JPanel input = new JPanel();
-        input.setBackground(new Color(245, 222, 179));
+        JButton hint = new JButton("💡 Need a Hint? (-15p)");
+        hint.setFont(new Font("Serif", Font.PLAIN, 14));
+        hint.setBackground(new Color(218, 165, 32));
+        hint.setFocusPainted(false);
+        hint.setAlignmentX(Component.CENTER_ALIGNMENT);
+        hint.addActionListener(e -> {
+            escape.score -= 15;
+            JOptionPane.showMessageDialog(this,
+                "Think about the journey of a human life...\n\n" +
+                "🍼 Infancy → 👶 Childhood → 🧑 Adulthood → 👴 Old Age\n\n" +
+                "What changes as we grow?",
+                "Ancient Wisdom",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        });
+
+        input.add(prompt);
         input.add(Box.createVerticalStrut(10));
         input.add(answer);
-        input.add(Box.createVerticalStrut(10));
+        input.add(Box.createVerticalStrut(15));
         input.add(submit);
+        input.add(Box.createVerticalStrut(10));
+        input.add(hint);
+
+        center.add(story, BorderLayout.NORTH);
+        center.add(riddle, BorderLayout.CENTER);
+        center.add(input, BorderLayout.SOUTH);
 
         add(header, BorderLayout.NORTH);
-        add(new JScrollPane(story), BorderLayout.CENTER);
-        add(input, BorderLayout.SOUTH);
+        add(center, BorderLayout.CENTER);
 
         setLocationRelativeTo(null);
         setVisible(true);
+
+        animation();
+
+        glowTimer = new Timer(50, e -> {
+            if (glowI) {
+                glow += 0.02f;
+                if (glow >= 0.6f) glowI = false;
+            } else {
+                glow -= 0.02f;
+                if (glow <= 0.3f) glowI = true;
+            }
+            riddle.setBackground(new Color(255, 248, 220, (int)(glow * 255)));
+        });
+        glowTimer.start();
+    }
+
+    private void animation() {
+        String friddle = "\"What walks on four legs in the morning,\n" + "two legs at noon,\n" + "and three legs in the evening?\"";
+
+        Timer timer = new Timer(80, new ActionListener() {
+            int i = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (i < friddle.length()) {
+                    riddle.setText(friddle.substring(0, i + 1));
+                    i++;
+                } else {
+                    ((Timer)e.getSource()).stop();
+                }
+            }
+        });
+        timer.start();
     }
 
     private void checkAnswer(JTextField input) {
         String answer = input.getText().trim().toLowerCase();
-        String[] correctAnswers = {"man", "human", "person"};
+        String[] correctAnswers = {"man", "human", "person", "mankind", "humanity"};
 
         if (Arrays.stream(correctAnswers).anyMatch(answer::contains)) {
-            JOptionPane.showMessageDialog(this,
-                "CORRECT!\n\n" +
-                "Just as Oedipus once answered me,\n" +
-                "so too have you proven your wisdom.\n\n" +
-                "The path ahead is revealed...",
-                "Stage 3 Complete!",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            dispose();
-            synchronized (lock) {
-                completed = true;
-                lock.notify();
-            }
+            glowTimer.stop();
+            riddle.setBackground(new Color(144, 238, 144));
+
+            Timer timer = new Timer(500, e -> {
+                JOptionPane.showMessageDialog(this,
+                    "CORRECT!\n\n" +
+                    "Just as Oedipus once answered me,\n" +
+                    "so too have you proven your wisdom.\n\n" +
+                    "The path ahead is revealed...",
+                    "Stage 3 Complete!",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                dispose();
+                if (parent != null) {
+                    synchronized (lock) {
+                        completed = true;
+                        lock.notify();
+                    }
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
         } else {
+            riddle.setBackground(new Color(255, 200, 200));
+            Timer timer = new Timer(300, e -> {
+                riddle.setBackground(new Color(255, 248, 220));
+            });
+            timer.setRepeats(false);
+            timer.start();
+
             JOptionPane.showMessageDialog(this,
                 "The Sphinx remains silent.\nThink about the stages of human life...",
                 "Try Again",
