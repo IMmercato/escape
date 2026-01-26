@@ -239,8 +239,24 @@ public class escape {
             f.dispose();
         }
 
+        printChapter("CHAPTER VII: ALEXANDER THE GREATE", "36");
+        AlexanderChapter alexander = new AlexanderChapter();
+        alexander.waitForCompletion();
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
+
+        printChapter("CHAPTER VIII: CHINA & THE SILK ROAD", "37");
+        ChinaChapter china = new ChinaChapter();
+        china.waitForCompletion();
+        for (Frame f : Frame.getFrames()) {
+            f.dispose();
+        }
+
         input.close();
+        System.out.println("\n\n\u001B[32m=== GAME COMPLETE ===\u001B[0m");
         System.out.println("Final score: " + score);
+        System.out.println("\nCongratulations! You've journeyed through history from Rome to China!");
     }
 }
 
@@ -2151,7 +2167,12 @@ class EgyptianChapter {
     }
 
     public void startStage3() {
-        new SphinxRiddle(this);
+        SphinxRiddle sphinx = new SphinxRiddle(this);
+        sphinx.waitForCompletion();
+        synchronized (lock) {
+            completed = true;
+            lock.notify();
+        }
     }
 
     public void waitForCompletion() {
@@ -2753,6 +2774,8 @@ class SphinxRiddle extends JFrame {
 }
 
 class AlexanderChapter {
+    private boolean completed = false;
+    private Object lock = new Object();
     public static void main(String[] args) {
         new GordianKnot(null);
     }
@@ -2771,6 +2794,18 @@ class AlexanderChapter {
 
     public void startStage4() {
         new GordianKnot(this);
+    }
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 }
 
@@ -3036,7 +3071,7 @@ class ConquestMapPuzzle extends JFrame {
                         JOptionPane.INFORMATION_MESSAGE
                     );
                     dispose();
-                    //parent.startStage2();
+                    parent.startStage2();
                 });
                 timer.setRepeats(false);
                 timer.start();
@@ -3168,7 +3203,7 @@ class LibraryOfAlexandria extends JFrame{
                                 JOptionPane.INFORMATION_MESSAGE
                             );
                             dispose();
-                            //parent.startStage3();
+                            parent.startStage3();
                         });
                         timer.setRepeats(false);
                         timer.start();
@@ -3278,7 +3313,7 @@ class SriLankanWidsom extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE
                 );
                 dispose();
-                //parent.startStage4();
+                parent.startStage4();
             } else {
                 JOptionPane.showMessageDialog(this,
                     "Not quite. Study the natural progression:\n" +
@@ -3583,6 +3618,9 @@ class GordianKnot extends JFrame {
 }
 
 class ChinaChapter {
+    private boolean completed = false;
+    private Object lock = new Object();
+
     // DEBUG
     public static void main(String[] args) {
         new FourInventions(null);
@@ -3594,6 +3632,20 @@ class ChinaChapter {
 
     public void startStage2() {
         new FourInventions(this);
+    }
+
+    public void startStage3() {}
+
+    public void waitForCompletion() {
+        synchronized (lock) {
+            while (!completed) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 }
 
@@ -3756,7 +3808,7 @@ class SilkRoadPuzzle extends JFrame {
                                 JOptionPane.INFORMATION_MESSAGE
                             );
                             dispose();
-                            //parent.startStage2();
+                            parent.startStage2();
                         });
                         timer.setRepeats(false);
                         timer.start();
@@ -3843,7 +3895,7 @@ class FourInventions extends JFrame {
 
                 if (selectedI == correct.get(inv)) {
                     inventionL.setBackground(new Color(144, 238, 144));
-                    matched.put(inv, false);
+                    matched.put(inv, true);
                 } else {
                     inventionL.setBackground(Color.WHITE);
                     matched.put(inv, false);
@@ -3886,6 +3938,6 @@ class FourInventions extends JFrame {
             JOptionPane.INFORMATION_MESSAGE
         );
         dispose();
-        //parent.startStage3();
+        parent.startStage3();
     }
 }
